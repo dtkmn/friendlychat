@@ -15,13 +15,17 @@
  */
 package com.google.firebase.codelab.friendlychat;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -61,6 +65,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.google.firebase.appindexing.Action;
@@ -121,6 +126,8 @@ public class MainActivity extends AppCompatActivity
     private DatabaseReference mFirebaseDatabaseReference;
     private FirebaseRecyclerAdapter<FriendlyMessage, MessageViewHolder>
             mFirebaseAdapter;
+
+    private BroadcastReceiver broadcastReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -277,6 +284,20 @@ public class MainActivity extends AppCompatActivity
                 startActivityForResult(intent, REQUEST_IMAGE);
             }
         });
+
+
+//        broadcastReceiver = new BroadcastReceiver() {
+//            @Override
+//            public void onReceive(Context context, Intent intent) {
+//                Log.d("Your data", intent.getScheme());
+//            }
+//        };
+//
+//        LocalBroadcastManager.getInstance(MainActivity.this)
+//                .registerReceiver(broadcastReceiver, new IntentFilter("testIntent"));
+
+        FirebaseMessaging.getInstance().subscribeToTopic("/topics/TelstraNotify");
+
     }
 
     @Override
@@ -299,6 +320,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onDestroy() {
         super.onDestroy();
+        unregisterReceiver(broadcastReceiver);
     }
 
     @Override
@@ -310,7 +332,26 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        return super.onOptionsItemSelected(item);
+//        return super.onOptionsItemSelected(item);
+        int i = item.getItemId();
+        if (i == R.id.work_menu) {
+//            String name = getCurrentImageTitle();
+//            String text = "I'd love you to hear about " + name;
+//            Intent sendIntent = new Intent();
+//            sendIntent.setAction(Intent.ACTION_SEND);
+//            sendIntent.putExtra(Intent.EXTRA_TEXT, "going to work screen");
+//            sendIntent.setType("text/plain");
+//            startActivity(sendIntent);
+            Intent intent = new Intent(this, WorkActivity.class);
+            startActivity(intent);
+            // [START custom_event]
+//            Bundle params = new Bundle();
+//            params.putString("image_name", name);
+//            params.putString("full_text", text);
+//            mFirebaseAnalytics.logEvent("share_image", params);
+            // [END custom_event]
+        }
+        return false;
     }
 
     @Override
