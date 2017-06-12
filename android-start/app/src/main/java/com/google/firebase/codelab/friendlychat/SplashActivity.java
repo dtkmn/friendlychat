@@ -1,13 +1,9 @@
 package com.google.firebase.codelab.friendlychat;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 
 /**
  * Created by dtkmn on 1/06/2017.

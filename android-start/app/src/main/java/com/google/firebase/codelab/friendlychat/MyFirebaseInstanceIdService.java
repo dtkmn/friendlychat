@@ -15,11 +15,14 @@
  */
 package com.google.firebase.codelab.friendlychat;
 
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
 import com.google.firebase.messaging.FirebaseMessaging;
+
+import java.util.Map;
 
 public class MyFirebaseInstanceIdService extends FirebaseInstanceIdService {
 
@@ -37,7 +40,7 @@ public class MyFirebaseInstanceIdService extends FirebaseInstanceIdService {
         // If you want to send messages to this application instance or
         // manage this apps subscriptions on the server side, send the
         // Instance ID token to your app server.
-//        sendRegistrationToServer(refreshedToken);
+        sendRegistrationToServer(refreshedToken);
     }
 
     /**
@@ -50,6 +53,9 @@ public class MyFirebaseInstanceIdService extends FirebaseInstanceIdService {
      */
     private void sendRegistrationToServer(String token) {
         // TODO: Implement this method to send token to your app server.
+        SharedPreferences settings = getSharedPreferences("tokenItem", 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString("token", token);
     }
 
 }
