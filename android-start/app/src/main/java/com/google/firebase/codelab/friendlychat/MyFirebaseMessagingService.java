@@ -94,22 +94,30 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
 
-        Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
-//                .setSmallIcon(R.drawable.ic_stat_ic_notification)
-                .setSmallIcon(R.drawable.telstra_logo)
-                .setContentTitle(remoteMessage.getNotification().getTitle())
-                .setContentText(remoteMessage.getNotification().getBody())
-                .setAutoCancel(true)
-//                .setSound(defaultSoundUri)
-                .setOngoing(true)
-                .setContentIntent(pendingIntent);
+        if(remoteMessage.getNotification().getTitle() == null) {
+            pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
+                    PendingIntent.FLAG_ONE_SHOT);
+        }
 
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        // if title exists means it is not plain text
 
-        notificationManager.notify(UUID.randomUUID().hashCode() /* ID of notification */, notificationBuilder.build());
+            Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+            NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
+                    .setSmallIcon(R.drawable.telstra_logo)
+                    .setContentTitle(remoteMessage.getNotification().getTitle() == null ? "Plain text message received" : remoteMessage.getNotification().getTitle())
+                    .setContentText(remoteMessage.getNotification().getBody())
+                    .setAutoCancel(true)
+                    .setSound(defaultSoundUri)
+                    .setOngoing(false)
+                    .setContentIntent(pendingIntent);
 
+//            if(remoteMessage.getNotification().getTitle() != null) {
+//                notificationBuilder.setContentIntent(pendingIntent);
+//            }
+
+            NotificationManager notificationManager =
+                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            notificationManager.notify(UUID.randomUUID().hashCode() /* ID of notification */, notificationBuilder.build());
     }
 
 }
