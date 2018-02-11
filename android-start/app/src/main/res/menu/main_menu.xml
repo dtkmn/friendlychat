@@ -23,6 +23,10 @@
         android:title="@string/work_screen"/>
 
     <item
+        android:id="@+id/bill_menu"
+        android:title="Bill"/>
+
+    <item
         android:id="@+id/chat_menu"
         android:title="@string/chat_screen"/>
 

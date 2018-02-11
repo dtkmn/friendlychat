@@ -29,6 +29,12 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity android:name="com.google.firebase.codelab.friendlychat.BillSummary">
+            <intent-filter>
+                <action android:name="BILL_SUMMARY" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
 
         <service
             android:name="com.google.firebase.codelab.friendlychat.MyFirebaseMessagingService">

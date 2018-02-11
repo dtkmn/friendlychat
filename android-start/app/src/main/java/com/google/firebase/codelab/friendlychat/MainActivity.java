@@ -49,6 +49,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -268,7 +269,7 @@ public class MainActivity extends AppCompatActivity
 //                .registerReceiver(broadcastReceiver, new IntentFilter("testIntent"));
 
         FirebaseMessaging.getInstance().subscribeToTopic("/topics/TelstraNotify");
-
+        FirebaseInstanceId.getInstance().getToken();
     }
 
     @Override
@@ -320,6 +321,9 @@ public class MainActivity extends AppCompatActivity
 //            params.putString("full_text", text);
 //            mFirebaseAnalytics.logEvent("share_image", params);
             // [END custom_event]
+        } else if(i == R.id.bill_menu) {
+            Intent intent = new Intent(this, BillSummary.class);
+            startActivity(intent);
         }
         return false;
     }
