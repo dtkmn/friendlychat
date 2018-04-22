@@ -51,6 +51,13 @@ dependencies {
     // Firebase UI
     compile 'com.firebaseui:firebase-ui-database:1.2.0'
 
+    // JSON
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.9.5'
+
+
+    compile 'com.loopj.android:android-async-http:1.4.9'
+
+
     // Testing dependencies
     androidTestCompile 'junit:junit:4.12'
     androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.2'
