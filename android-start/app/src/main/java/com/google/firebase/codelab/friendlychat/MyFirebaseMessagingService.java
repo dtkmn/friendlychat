@@ -15,14 +15,7 @@
  */
 package com.google.firebase.codelab.friendlychat;
 
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.media.RingtoneManager;
-import android.net.Uri;
-import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.google.firebase.database.DatabaseReference;
@@ -30,8 +23,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import java.util.HashSet;
 import java.util.Map;
-import java.util.UUID;
+import java.util.Set;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
@@ -52,32 +46,41 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         Log.d(TAG, "FCM Data Message: " + remoteMessage.getData());
 
         // Upload the received message to FCM DB
-        if(remoteMessage.getNotification() != null && remoteMessage.getData() != null) {
-            String from = remoteMessage.getFrom();
-            switch (from) {
-                case "/topics/TelstraNotify":
-                    sendNotification(remoteMessage);
-                    break;
-                default:
-                    sendNotification(remoteMessage);
-                    break;
-            }
-        }
+//        if(remoteMessage.getNotification() != null && remoteMessage.getData() != null) {
+//            String from = remoteMessage.getFrom();
+//            switch (from) {
+//                case "/topics/TelstraNotify":
+//                    saveNotification(remoteMessage);
+//                    break;
+//                default:
+//                    saveNotification(remoteMessage);
+//                    break;
+//            }
+//        }
+
+
+        saveNotification(remoteMessage);
     }
 
-    private void sendNotification(RemoteMessage remoteMessage) {
+    private void saveNotification(RemoteMessage remoteMessage) {
 
         SharedPreferences settings = getSharedPreferences("workItem", 0);
         SharedPreferences.Editor editor = settings.edit();
-        Map<String, String> remoteMessageData = remoteMessage.getData();
-        for(String key: remoteMessageData.keySet()) {
-            editor.putString(key, remoteMessageData.get(key));
-        }
+//        Map<String, String> remoteMessageData = remoteMessage.getData();
+//        for(String key: remoteMessageData.keySet()) {
+//            editor.putString(key, remoteMessageData.get(key));
+//        }
+        Set<String> receivedMessages = settings.getStringSet("messages", null);
+        if(receivedMessages == null) receivedMessages = new HashSet<>();
+        receivedMessages.add(remoteMessage.toString());
+        editor.putStringSet("messages", receivedMessages);
 //        editor.putStringSet("workItemKeys", remoteMessage.getData().keySet());
 //        editor.putString("workItemValues", remoteMessage.getData());
 //        editor.putBoolean("silentMode", mSilentMode);
         // Commit the edits!
-        editor.commit();
+        editor.apply();
+
+        Map<String, String> data = remoteMessage.getData();
 
 //        ReceivedMessage receivedMessage = new ReceivedMessage(
 //                remoteMessage.getFrom(), remoteMessage.getNotification().getTitle(),
@@ -85,17 +88,19 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 //                data.get("ticketNo"), data.get("jobType"), data.get("address"),
 //                data.get("description")
 //        );
-//        mFirebaseDatabaseReference.child(MESSAGES_CHILD)
-//                .push().setValue(receivedMessage);
 
+        mFirebaseDatabaseReference.child(MESSAGES_CHILD)
+                .push().setValue(remoteMessage);
+
+        /*
         Intent intent = new Intent(this, WorkActivity.class);
 //        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 //        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
 
         if(remoteMessage.getNotification().getTitle() == null) {
-            pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
+            pendingIntent = PendingIntent.getActivity(this, 0, intent,
                     PendingIntent.FLAG_ONE_SHOT);
         }
 
@@ -117,7 +122,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
             NotificationManager notificationManager =
                     (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            notificationManager.notify(UUID.randomUUID().hashCode() /* ID of notification */, notificationBuilder.build());
+            notificationManager.notify(UUID.randomUUID().hashCode(), notificationBuilder.build());
+
+            */
     }
 
 }
