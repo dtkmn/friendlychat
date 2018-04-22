@@ -17,11 +17,13 @@
     <!--android:layout_above="@+id/linearLayout"/>-->
 
 
-    <ListView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true" />
-
-
+    <EditText
+        android:id="@+id/messagesText"
+        android:layout_width="309dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="25dp"
+        android:ems="10"
+        android:inputType="textMultiLine" />
 </RelativeLayout>

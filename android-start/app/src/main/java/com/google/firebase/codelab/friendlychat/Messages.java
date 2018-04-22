@@ -1,16 +1,11 @@
 package com.google.firebase.codelab.friendlychat;
 
-import android.app.ActionBar;
-import android.app.ListActivity;
 import android.content.Loader;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.view.Gravity;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ListView;
-import android.widget.ProgressBar;
+import android.support.v7.app.AppCompatActivity;
+import android.widget.EditText;
 import android.widget.SimpleCursorAdapter;
 
 import java.util.HashSet;
@@ -20,11 +15,12 @@ import java.util.Set;
  * Created by dtkmn on 1/06/2017.
  */
 
-public class Messages extends ListActivity {
+public class Messages extends AppCompatActivity {
 
     // This is the Adapter being used to display the list's data
     SimpleCursorAdapter mAdapter;
 
+    private EditText messagesText;
     // These are the Contacts rows that we will retrieve
 //    static final String[] PROJECTION = new String[] {ContactsContract.Data._ID,
 //            ContactsContract.Data.DISPLAY_NAME};
@@ -37,34 +33,39 @@ public class Messages extends ListActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        setContentView(R.layout.messages);
         // Create a progress bar to display while the list loads
-        ProgressBar progressBar = new ProgressBar(this);
-        progressBar.setLayoutParams(new ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,
-                ActionBar.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
-        progressBar.setIndeterminate(true);
-        getListView().setEmptyView(progressBar);
+//        ProgressBar progressBar = new ProgressBar(this);
+//        progressBar.setLayoutParams(new ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT,
+//                ActionBar.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
+//        progressBar.setIndeterminate(true);
+//        getListView().setEmptyView(progressBar);
 
         // Must add the progress bar to the root of the layout
-        ViewGroup root = (ViewGroup) findViewById(android.R.id.content);
-        root.addView(progressBar);
+//        ViewGroup root = (ViewGroup) findViewById(android.R.id.content);
+//        root.addView(progressBar);
 
+        messagesText = (EditText) findViewById(R.id.messagesText);
 
         SharedPreferences settings = getSharedPreferences("workItem", 0);
         Set<String> receivedMessages = settings.getStringSet("messages", null);
         if(receivedMessages == null) receivedMessages = new HashSet<>();
         // For the cursor adapter, specify which columns go into which views
-        String[] fromColumns = receivedMessages.toArray(new String[receivedMessages.size()]);
+//        String[] fromColumns = receivedMessages.toArray(new String[receivedMessages.size()]);
+
+        for(String message: receivedMessages) {
+            messagesText.append(message + "\n");
+        }
 
 
-        int[] toViews = {android.R.id.text1}; // The TextView in simple_list_item_1
-
-        // Create an empty adapter we will use to display the loaded data.
-        // We pass null for the cursor, then update it in onLoadFinished()
-        mAdapter = new SimpleCursorAdapter(this,
-                android.R.layout.simple_list_item_1, null,
-                fromColumns, toViews, 0);
-        setListAdapter(mAdapter);
+//        int[] toViews = {android.R.id.text1}; // The TextView in simple_list_item_1
+//
+//        // Create an empty adapter we will use to display the loaded data.
+//        // We pass null for the cursor, then update it in onLoadFinished()
+//        mAdapter = new SimpleCursorAdapter(this,
+//                android.R.layout.simple_list_item_1, null,
+//                fromColumns, toViews, 0);
+//        setListAdapter(mAdapter);
 
         // Prepare the loader. Either re-connect with an existing one,
         // or start a new one.
@@ -94,8 +95,8 @@ public class Messages extends ListActivity {
         mAdapter.swapCursor(null);
     }
 
-    @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-        // Do something when a list item is clicked
-    }
+//    @Override
+//    public void onListItemClick(ListView l, View v, int position, long id) {
+//        // Do something when a list item is clicked
+//    }
 }

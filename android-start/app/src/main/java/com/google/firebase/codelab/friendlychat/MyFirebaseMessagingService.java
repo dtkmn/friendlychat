@@ -72,7 +72,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 //        }
         Set<String> receivedMessages = settings.getStringSet("messages", null);
         if(receivedMessages == null) receivedMessages = new HashSet<>();
-        receivedMessages.add(remoteMessage.toString());
+        receivedMessages.add(remoteMessage.getData().toString());
         editor.putStringSet("messages", receivedMessages);
 //        editor.putStringSet("workItemKeys", remoteMessage.getData().keySet());
 //        editor.putString("workItemValues", remoteMessage.getData());
