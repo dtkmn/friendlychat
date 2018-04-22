@@ -86,7 +86,7 @@
             android:textColor="#5DADE2" />
 
         <TextView
-            android:id="@+id/ticketNumberTextText"
+            android:id="@+id/billAccountNumberText"
             android:layout_width="50dp"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
