@@ -1,10 +1,14 @@
 package com.google.firebase.codelab.friendlychat;
 
+import android.content.Intent;
 import android.content.Loader;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.SimpleCursorAdapter;
 
@@ -99,4 +103,35 @@ public class Messages extends AppCompatActivity {
 //    public void onListItemClick(ListView l, View v, int position, long id) {
 //        // Do something when a list item is clicked
 //    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int i = item.getItemId();
+
+        if (i == R.id.chat_menu) {
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
+        } else if (i == R.id.about_menu) {
+            Intent intent = new Intent(this, About.class);
+            startActivity(intent);
+        } else if (i == R.id.work_menu) {
+            Intent intent = new Intent(this, WorkActivity.class);
+            startActivity(intent);
+        } else if(i == R.id.bill_menu) {
+            Intent intent = new Intent(this, BillSummary.class);
+            startActivity(intent);
+        } else if (i == R.id.messages) {
+            Intent intent = new Intent(this, Messages.class);
+            startActivity(intent);
+        }
+        return false;
+    }
+
 }

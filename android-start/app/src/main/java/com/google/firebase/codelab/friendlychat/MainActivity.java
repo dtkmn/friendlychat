@@ -307,21 +307,8 @@ public class MainActivity extends AppCompatActivity
 //        return super.onOptionsItemSelected(item);
         int i = item.getItemId();
         if (i == R.id.work_menu) {
-//            String name = getCurrentImageTitle();
-//            String text = "I'd love you to hear about " + name;
-//            Intent sendIntent = new Intent();
-//            sendIntent.setAction(Intent.ACTION_SEND);
-//            sendIntent.putExtra(Intent.EXTRA_TEXT, "going to work screen");
-//            sendIntent.setType("text/plain");
-//            startActivity(sendIntent);
             Intent intent = new Intent(this, WorkActivity.class);
             startActivity(intent);
-            // [START custom_event]
-//            Bundle params = new Bundle();
-//            params.putString("image_name", name);
-//            params.putString("full_text", text);
-//            mFirebaseAnalytics.logEvent("share_image", params);
-            // [END custom_event]
         } else if(i == R.id.bill_menu) {
             Intent intent = new Intent(this, BillSummary.class);
             startActivity(intent);

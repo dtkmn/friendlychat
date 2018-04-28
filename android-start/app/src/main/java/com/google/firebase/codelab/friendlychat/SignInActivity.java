@@ -21,6 +21,8 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -235,6 +237,13 @@ public class SignInActivity extends AppCompatActivity implements
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int i = item.getItemId();
 
@@ -249,6 +258,9 @@ public class SignInActivity extends AppCompatActivity implements
             startActivity(intent);
         } else if(i == R.id.bill_menu) {
             Intent intent = new Intent(this, BillSummary.class);
+            startActivity(intent);
+        } else if (i == R.id.messages) {
+            Intent intent = new Intent(this, Messages.class);
             startActivity(intent);
         }
         return false;

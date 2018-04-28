@@ -75,6 +75,9 @@ public class BillSummary extends AppCompatActivity {
         } else if (i == R.id.about_menu) {
             Intent intent = new Intent(this, About.class);
             startActivity(intent);
+        } else if (i == R.id.messages) {
+            Intent intent = new Intent(this, Messages.class);
+            startActivity(intent);
         }
         return false;
     }
