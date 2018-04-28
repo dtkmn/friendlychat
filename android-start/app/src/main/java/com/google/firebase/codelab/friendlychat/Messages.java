@@ -130,6 +130,9 @@ public class Messages extends AppCompatActivity {
         } else if (i == R.id.messages) {
             Intent intent = new Intent(this, Messages.class);
             startActivity(intent);
+        } else if (i == R.id.sign_in_menu) {
+            Intent intent = new Intent(this, SignInActivity.class);
+            startActivity(intent);
         }
         return false;
     }
