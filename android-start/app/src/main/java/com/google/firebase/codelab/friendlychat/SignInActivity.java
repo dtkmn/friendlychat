@@ -166,7 +166,7 @@ public class SignInActivity extends AppCompatActivity implements
 
     private void linkUserToApp(String accessToken, String fcmToken) {
 
-        String username = mUsernameText.getText().toString();
+        final String username = mUsernameText.getText().toString();
 
         if(username == null || username.isEmpty()) {
             System.out.println("Username not valid!!!");
@@ -220,6 +220,10 @@ public class SignInActivity extends AppCompatActivity implements
 //                                editor.putString("appInstanceId", appInstanceId);
 //                                editor.apply();
 //                            }
+                            SharedPreferences settings = getSharedPreferences("appInstance", 0);
+                            SharedPreferences.Editor editor = settings.edit();
+                            editor.putString("username", username);
+                            editor.apply();
                         }
 
                         @Override
