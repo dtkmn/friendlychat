@@ -5,28 +5,20 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.firebase.codelab.friendlychat.entity.AccessTokenResponse;
-import com.google.firebase.codelab.friendlychat.entity.AppInstance;
-import com.google.firebase.codelab.friendlychat.entity.LogoutPayload;
+import com.google.firebase.codelab.friendlychat.entity.LinkUserAndAppRequest;
+import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
-import com.loopj.android.http.SyncHttpClient;
+import com.loopj.android.http.RequestParams;
 
 import org.json.JSONObject;
 
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.net.URLEncoder;
 
 import cz.msebera.android.httpclient.Header;
@@ -44,6 +36,9 @@ public class About extends AppCompatActivity {
     private String currentToken;
     private String appInstanceId;
     private String username;
+
+    private final String TAG = "About";
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -106,7 +101,7 @@ public class About extends AppCompatActivity {
             startActivity(intent);
         } else if (i == R.id.sign_out_menu) {
             // Call remote url to do unlink!!
-
+            logout();
         }
         return false;
     }
@@ -118,8 +113,10 @@ public class About extends AppCompatActivity {
 
 
     private void logout() {
-        OutputStream out = null;
         try {
+
+            AsyncHttpClient client = new AsyncHttpClient(true, 80, 443);
+            client.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
             String data = URLEncoder.encode("grant_type", "UTF-8")
                     + "=" + URLEncoder.encode("client_credentials", "UTF-8");
@@ -133,61 +130,59 @@ public class About extends AppCompatActivity {
             data += "&" + URLEncoder.encode("scope_value", "UTF-8")
                     + "=" + URLEncoder.encode("PUSHFCM-MGMT", "UTF-8");
 
-            URL url = new URL("https://slot2.org002.t-dev.telstra.net:443/v2/oauth/token");
+            RequestParams params = new RequestParams();
+            params.put("grant_type", "client_credentials");
+            params.put("client_id", "SKoEL7R7kg3GhFO7xGV4Yj39jNWzTxxO");
+            params.put("client_secret", "8NSrfe1lAWUXDjtS");
+            params.put("scope_value", "PUSHFCM-MGMT");
 
-            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setRequestMethod("POST");
+            StringEntity entity = new StringEntity(data);
 
-            out = new BufferedOutputStream(urlConnection.getOutputStream());
+            // https://slot2.org002.t-dev.telstra.net:443/v2/oauth/token
+            client.post("https://slot2.org002.t-dev.telstra.net/v2/oauth/token",
+                    params, new JsonHttpResponseHandler() {
+                        @Override
+                        public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                            // If the response is JSONObject instead of expected JSONArray
+                            System.out.println(response);
+//                            {
+//                                "access_token": "GsKEoBB1a5p8GAubHXTh6TmQ2xfI",
+//                                    "token_type": "Bearer",
+//                                    "expires_in": "3599"
+//                            }
+                            if(response.has("access_token")) {
+                                String accessToken = response.optString("access_token");
+                                SharedPreferences settings = getSharedPreferences("tokenItem", 0);
+                                String fcmToken = settings.getString("token", null);
 
-            BufferedWriter writer = new BufferedWriter (new OutputStreamWriter(out, "UTF-8"));
+                                if(fcmToken != null) createAppInstance(accessToken);
 
-            writer.write(data);
+//                                SharedPreferences settings = getSharedPreferences("appInstance", 0);
+//                                SharedPreferences.Editor editor = settings.edit();
+//                                editor.putString("appInstanceId", appInstanceId);
+//                                editor.apply();
+                            }
+                        }
 
-            writer.flush();
-
-
-            BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-            StringBuilder sb = new StringBuilder();
-            String line = null;
-
-            // Read Server Response
-            while((line = reader.readLine()) != null)
-            {
-                // Append server response in string
-                sb.append(line + "\n");
-            }
-
-            System.out.println(sb.toString());
-
-            ObjectMapper mapper = new ObjectMapper();
-            AccessTokenResponse accessTokenResponse = mapper.readValue(sb.toString(), AccessTokenResponse.class);
-
-            createAppInstance(accessTokenResponse.getAccess_token());
-
-            writer.close();
-
-            out.close();
-
-            urlConnection.connect();
+                        @Override
+                        public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject jsonObject) {
+                            System.out.println(statusCode + ":" + jsonObject);
+                        }
+                    }
+            );
 
 
         } catch (Exception e) {
-
             System.out.println(e.getMessage());
-
-
-
         }
 
     }
 
     private void createAppInstance(String accessToken) {
 
-        LogoutPayload payload = new LogoutPayload();
-        payload.setAppInstanceNickname("Notify-Android");
-        payload.setPushNotificationtoken(currentToken);
-        payload.setUsername(username);
+        LinkUserAndAppRequest linkUserAndAppRequest = new LinkUserAndAppRequest();
+        linkUserAndAppRequest.setPushNotificationToken(currentToken);
+        linkUserAndAppRequest.setUsername(username);
 
 //        {
 //            "username": "jigar1010@test.com",
@@ -199,11 +194,11 @@ public class About extends AppCompatActivity {
 
             ObjectMapper mapper = new ObjectMapper();
 
-            SyncHttpClient client = new SyncHttpClient(true, 80, 443);
+            AsyncHttpClient client = new AsyncHttpClient(true, 80, 443);
             client.addHeader("Authorization", "Bearer " + accessToken);
             client.addHeader("Content-Type", "application/json");
 
-            StringEntity entity = new StringEntity(mapper.writeValueAsString(payload));
+            StringEntity entity = new StringEntity(mapper.writeValueAsString(linkUserAndAppRequest));
 
 //            https://slot2.org002.t-dev.telstra.net:443/v1/notification-mgmt/app-instances/bfddf7ab-a786-4a32-bb9e-737024bd2f5e/unlinkUser2
             client.addHeader("username", username);
@@ -212,7 +207,8 @@ public class About extends AppCompatActivity {
                         @Override
                         public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                             // If the response is JSONObject instead of expected JSONArray
-                            System.out.println(response);
+                            System.out.println(statusCode + ":" + response);
+                            Log.d(TAG, response.toString());
                         }
 
                         @Override
