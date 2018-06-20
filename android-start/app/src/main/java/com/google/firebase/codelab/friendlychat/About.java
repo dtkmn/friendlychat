@@ -47,10 +47,10 @@ public class About extends AppCompatActivity {
         mFcmToken = (TextView) findViewById(R.id.fcmTokenText);
         mAppInstanceId = (TextView) findViewById(R.id.appInstanceIdValue);
 
-        SharedPreferences settings = getSharedPreferences("tokenItem", 0);
-        mFcmToken.setText(settings.getString("token", mFcmToken.getText().toString()));
-        System.out.println(settings.getString("token", ""));
-        currentToken = settings.getString("token", "");
+        SharedPreferences settings = getSharedPreferences("appInstance", 0);
+        mFcmToken.setText(settings.getString("fcmToken", mFcmToken.getText().toString()));
+        System.out.println(settings.getString("fcmToken", ""));
+        currentToken = settings.getString("fcmToken", "");
 
         SharedPreferences appInstanceSettings = getSharedPreferences("appInstance", 0);
         mAppInstanceId.setText(appInstanceSettings.getString("appInstanceId", mAppInstanceId.getText().toString()));
