@@ -140,10 +140,11 @@ public class SignInActivity extends AppCompatActivity implements
                             if(response.has("access_token")) {
                                 String accessToken = response.optString("access_token");
 
-                                SharedPreferences settings = getSharedPreferences("tokenItem", 0);
-                                String fcmToken = settings.getString("token", null);
+                                SharedPreferences settings = getSharedPreferences("appInstance", 0);
+                                String fcmToken = settings.getString("fcmToken", null);
 
-                                if(fcmToken != null) linkUserToApp(accessToken, fcmToken);
+                                if(fcmToken != null)
+                                    linkUserToApp(accessToken, fcmToken);
 
 //                                SharedPreferences settings = getSharedPreferences("appInstance", 0);
 //                                SharedPreferences.Editor editor = settings.edit();
