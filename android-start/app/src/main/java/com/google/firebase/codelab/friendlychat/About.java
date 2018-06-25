@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.firebase.codelab.friendlychat.entity.Config;
 import com.google.firebase.codelab.friendlychat.entity.LinkUserAndAppRequest;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -38,6 +39,7 @@ public class About extends AppCompatActivity {
     private String username;
 
     private final String TAG = "About";
+    private Config config = new Config();
 
 
     @Override
@@ -118,28 +120,13 @@ public class About extends AppCompatActivity {
             AsyncHttpClient client = new AsyncHttpClient(true, 80, 443);
             client.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
-            String data = URLEncoder.encode("grant_type", "UTF-8")
-                    + "=" + URLEncoder.encode("client_credentials", "UTF-8");
-
-            data += "&" + URLEncoder.encode("client_id", "UTF-8") + "="
-                    + URLEncoder.encode("SKoEL7R7kg3GhFO7xGV4Yj39jNWzTxxO", "UTF-8");
-
-            data += "&" + URLEncoder.encode("client_secret", "UTF-8")
-                    + "=" + URLEncoder.encode("8NSrfe1lAWUXDjtS", "UTF-8");
-
-            data += "&" + URLEncoder.encode("scope_value", "UTF-8")
-                    + "=" + URLEncoder.encode("PUSHFCM-MGMT", "UTF-8");
-
             RequestParams params = new RequestParams();
-            params.put("grant_type", "client_credentials");
-            params.put("client_id", "SKoEL7R7kg3GhFO7xGV4Yj39jNWzTxxO");
-            params.put("client_secret", "8NSrfe1lAWUXDjtS");
-            params.put("scope_value", "PUSHFCM-MGMT");
+            params.put("grant_type", config.getGrantType());
+            params.put("client_id", config.getClientId());
+            params.put("client_secret", config.getClientSecret());
+            params.put("scope_value", config.getScopeValue());
 
-            StringEntity entity = new StringEntity(data);
-
-            // https://slot2.org002.t-dev.telstra.net:443/v2/oauth/token
-            client.post("https://slot2.org002.t-dev.telstra.net/v2/oauth/token",
+            client.post("https://" + config.getBaseUrl() + "/v2/oauth/token",
                     params, new JsonHttpResponseHandler() {
                         @Override
                         public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
@@ -200,9 +187,10 @@ public class About extends AppCompatActivity {
 
             StringEntity entity = new StringEntity(mapper.writeValueAsString(linkUserAndAppRequest));
 
-//            https://slot2.org002.t-dev.telstra.net:443/v1/notification-mgmt/app-instances/bfddf7ab-a786-4a32-bb9e-737024bd2f5e/unlinkUser2
+//          /v1/notification-mgmt/app-instances/bfddf7ab-a786-4a32-bb9e-737024bd2f5e/unlinkUser2
             client.addHeader("username", username);
-            client.post(getApplicationContext(), "https://slot2.org002.t-dev.telstra.net/v1/notification-mgmt/app-instances/" + appInstanceId + "/unlinkUser",
+            client.post(getApplicationContext(), "https://" + config.getBaseUrl() +
+                    "/v1/notification-mgmt/app-instances/" + appInstanceId + "/unlinkUser",
                     entity, "application/json", new JsonHttpResponseHandler() {
                         @Override
                         public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
