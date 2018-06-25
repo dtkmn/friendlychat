@@ -33,6 +33,7 @@ public class About extends AppCompatActivity {
 
     private TextView mFcmToken;
     private TextView mAppInstanceId;
+    private TextView mUserName;
 
     private String currentToken;
     private String appInstanceId;
@@ -48,6 +49,7 @@ public class About extends AppCompatActivity {
         setContentView(R.layout.about);
         mFcmToken = (TextView) findViewById(R.id.fcmTokenText);
         mAppInstanceId = (TextView) findViewById(R.id.appInstanceIdValue);
+        mUserName = (TextView) findViewById(R.id.userNameValue);
 
         SharedPreferences settings = getSharedPreferences("appInstance", 0);
         mFcmToken.setText(settings.getString("fcmToken", mFcmToken.getText().toString()));
@@ -60,12 +62,16 @@ public class About extends AppCompatActivity {
 
         appInstanceId = appInstanceSettings.getString("appInstanceId", "");
         username = appInstanceSettings.getString("username", "");
+        mUserName.setText(settings.getString("username", mUserName.getText().toString()));
+
 
         if(this.getIntent().getExtras() != null) {
             mFcmToken.setText(
                     this.getIntent().getExtras().getString("fcmTokenText", mFcmToken.getText().toString()));
             mAppInstanceId.setText(
                     this.getIntent().getExtras().getString("appInstanceIdValue", mAppInstanceId.getText().toString()));
+            mUserName.setText(
+                    this.getIntent().getExtras().getString("userNameValue", mUserName.getText().toString()));
         }
 
     }
@@ -184,11 +190,12 @@ public class About extends AppCompatActivity {
             AsyncHttpClient client = new AsyncHttpClient(true, 80, 443);
             client.addHeader("Authorization", "Bearer " + accessToken);
             client.addHeader("Content-Type", "application/json");
+            client.addHeader("username", username);
 
             StringEntity entity = new StringEntity(mapper.writeValueAsString(linkUserAndAppRequest));
 
 //          /v1/notification-mgmt/app-instances/bfddf7ab-a786-4a32-bb9e-737024bd2f5e/unlinkUser2
-            client.addHeader("username", username);
+
             client.post(getApplicationContext(), "https://" + config.getBaseUrl() +
                     "/v1/notification-mgmt/app-instances/" + appInstanceId + "/unlinkUser",
                     entity, "application/json", new JsonHttpResponseHandler() {
@@ -197,6 +204,10 @@ public class About extends AppCompatActivity {
                             // If the response is JSONObject instead of expected JSONArray
                             System.out.println(statusCode + ":" + response);
                             Log.d(TAG, response.toString());
+                            SharedPreferences settings = getSharedPreferences("appInstance", 0);
+                            SharedPreferences.Editor editor = settings.edit();
+                            editor.remove("username");
+                            editor.apply();
                         }
 
                         @Override

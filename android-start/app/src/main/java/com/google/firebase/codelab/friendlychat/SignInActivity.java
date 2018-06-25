@@ -237,17 +237,20 @@ public class SignInActivity extends AppCompatActivity implements
         if (i == R.id.chat_menu) {
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
-        } else if (i == R.id.about_menu) {
-            Intent intent = new Intent(this, About.class);
-            startActivity(intent);
         } else if (i == R.id.work_menu) {
             Intent intent = new Intent(this, WorkActivity.class);
             startActivity(intent);
         } else if(i == R.id.bill_menu) {
             Intent intent = new Intent(this, BillSummary.class);
             startActivity(intent);
+        } else if (i == R.id.about_menu) {
+            Intent intent = new Intent(this, About.class);
+            startActivity(intent);
         } else if (i == R.id.messages) {
             Intent intent = new Intent(this, Messages.class);
+            startActivity(intent);
+        } else if (i == R.id.sign_in_menu) {
+            Intent intent = new Intent(this, SignInActivity.class);
             startActivity(intent);
         }
         return false;

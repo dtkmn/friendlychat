@@ -306,7 +306,10 @@ public class MainActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
 //        return super.onOptionsItemSelected(item);
         int i = item.getItemId();
-        if (i == R.id.work_menu) {
+        if (i == R.id.chat_menu) {
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
+        } else if (i == R.id.work_menu) {
             Intent intent = new Intent(this, WorkActivity.class);
             startActivity(intent);
         } else if(i == R.id.bill_menu) {
