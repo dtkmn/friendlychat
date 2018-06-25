@@ -140,10 +140,11 @@ public class SignInActivity extends AppCompatActivity implements
                             if(response.has("access_token")) {
                                 String accessToken = response.optString("access_token");
 
-                                SharedPreferences settings = getSharedPreferences("tokenItem", 0);
-                                String fcmToken = settings.getString("token", null);
+                                SharedPreferences settings = getSharedPreferences("appInstance", 0);
+                                String fcmToken = settings.getString("fcmToken", null);
 
-                                if(fcmToken != null) linkUserToApp(accessToken, fcmToken);
+                                if(fcmToken != null)
+                                    linkUserToApp(accessToken, fcmToken);
 
 //                                SharedPreferences settings = getSharedPreferences("appInstance", 0);
 //                                SharedPreferences.Editor editor = settings.edit();
@@ -166,7 +167,7 @@ public class SignInActivity extends AppCompatActivity implements
 
     private void linkUserToApp(String accessToken, String fcmToken) {
 
-        String username = mUsernameText.getText().toString();
+        final String username = mUsernameText.getText().toString();
 
         if(username == null || username.isEmpty()) {
             System.out.println("Username not valid!!!");
@@ -175,8 +176,6 @@ public class SignInActivity extends AppCompatActivity implements
 
         LinkUserAndAppRequest linkUserAndAppRequest = new LinkUserAndAppRequest();
         linkUserAndAppRequest.setPushNotificationToken(fcmToken);
-        linkUserAndAppRequest.setActive(true);
-        linkUserAndAppRequest.setAppInstanceNickname("");
         linkUserAndAppRequest.setUsername(username);
 
         // https://slot2.org002.t-dev.telstra.net:443/v1/notification-mgmt/app-instances/63b8a1c1-2b5c-4378-8b5d-1aa0361049e0/assigned-tdi-users/jigar1010@test.com
@@ -199,12 +198,13 @@ public class SignInActivity extends AppCompatActivity implements
             AsyncHttpClient client = new AsyncHttpClient(true, 80, 443);
             client.addHeader("Authorization", "Bearer " + accessToken);
             client.addHeader("Content-Type", "application/json");
+            client.addHeader("username", username);
 
             StringEntity entity = new StringEntity(mapper.writeValueAsString(linkUserAndAppRequest));
 
             https://slot2.org002.t-dev.telstra.net:443/v2/oauth/token
-            client.put(getApplicationContext(), "https://slot2.org002.t-dev.telstra.net/v1/notification-mgmt/app-instances/" +
-                            appInstanceId + "/assigned-tdi-users/" + username,
+            client.post(getApplicationContext(), "https://slot2.org002.t-dev.telstra.net/v1/notification-mgmt/app-instances/" +
+                            appInstanceId + "/linkUser",
                     entity, "application/json", new JsonHttpResponseHandler() {
                         @Override
                         public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
@@ -220,6 +220,10 @@ public class SignInActivity extends AppCompatActivity implements
 //                                editor.putString("appInstanceId", appInstanceId);
 //                                editor.apply();
 //                            }
+                            SharedPreferences settings = getSharedPreferences("appInstance", 0);
+                            SharedPreferences.Editor editor = settings.edit();
+                            editor.putString("username", username);
+                            editor.apply();
                         }
 
                         @Override

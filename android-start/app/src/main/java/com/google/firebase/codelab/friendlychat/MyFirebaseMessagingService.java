@@ -18,14 +18,25 @@ package com.google.firebase.codelab.friendlychat;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.firebase.codelab.friendlychat.entity.DeliveryStatus;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
+import com.loopj.android.http.SyncHttpClient;
 
+import org.json.JSONObject;
+
+import java.net.URLEncoder;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import cz.msebera.android.httpclient.Header;
+import cz.msebera.android.httpclient.entity.StringEntity;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
@@ -62,6 +73,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         saveNotification(remoteMessage);
     }
 
+
+
     private void saveNotification(RemoteMessage remoteMessage) {
 
         SharedPreferences settings = getSharedPreferences("workItem", 0);
@@ -92,39 +105,134 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         mFirebaseDatabaseReference.child(MESSAGES_CHILD)
                 .push().setValue(remoteMessage);
 
-        /*
-        Intent intent = new Intent(this, WorkActivity.class);
-//        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
 
-        if(remoteMessage.getNotification().getTitle() == null) {
-            pendingIntent = PendingIntent.getActivity(this, 0, intent,
-                    PendingIntent.FLAG_ONE_SHOT);
+        String uuid = data.get("UUID");
+        String userId = data.get("userId");
+
+        SharedPreferences appInstanceSettings = getSharedPreferences("appInstance", 0);
+        String username = appInstanceSettings.getString("username", "");
+        if(!username.equals(userId)) {
+            System.out.println("payload username not equals to local saved username!");
+        } else {
+            getAccessToken(uuid);
         }
 
-        // if title exists means it is not plain text
+    }
 
-            Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-            NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
-                    .setSmallIcon(R.drawable.telstra_logo)
-                    .setContentTitle(remoteMessage.getNotification().getTitle() == null ? "Plain text message received" : remoteMessage.getNotification().getTitle())
-                    .setContentText(remoteMessage.getNotification().getBody())
-                    .setAutoCancel(true)
-                    .setSound(defaultSoundUri)
-                    .setOngoing(false)
-                    .setContentIntent(pendingIntent);
 
-//            if(remoteMessage.getNotification().getTitle() != null) {
-//                notificationBuilder.setContentIntent(pendingIntent);
-//            }
+    private void getAccessToken(final String uuid) {
+        try {
 
-            NotificationManager notificationManager =
-                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            notificationManager.notify(UUID.randomUUID().hashCode(), notificationBuilder.build());
+            ObjectMapper mapper = new ObjectMapper();
 
-            */
+            SyncHttpClient client = new SyncHttpClient(true, 80, 443);
+            client.addHeader("Content-Type", "application/x-www-form-urlencoded");
+
+            String data = URLEncoder.encode("grant_type", "UTF-8")
+                    + "=" + URLEncoder.encode("client_credentials", "UTF-8");
+
+            data += "&" + URLEncoder.encode("client_id", "UTF-8") + "="
+                    + URLEncoder.encode("SKoEL7R7kg3GhFO7xGV4Yj39jNWzTxxO", "UTF-8");
+
+            data += "&" + URLEncoder.encode("client_secret", "UTF-8")
+                    + "=" + URLEncoder.encode("8NSrfe1lAWUXDjtS", "UTF-8");
+
+            data += "&" + URLEncoder.encode("scope_value", "UTF-8")
+                    + "=" + URLEncoder.encode("PUSHFCM-MGMT", "UTF-8");
+
+            RequestParams params = new RequestParams();
+            params.put("grant_type", "client_credentials");
+            params.put("client_id", "SKoEL7R7kg3GhFO7xGV4Yj39jNWzTxxO");
+            params.put("client_secret", "8NSrfe1lAWUXDjtS");
+            params.put("scope_value", "PUSHFCM-MGMT");
+
+            StringEntity entity = new StringEntity(data);
+
+            // https://slot2.org002.t-dev.telstra.net:443/v2/oauth/token
+            client.post("https://slot2.org002.t-dev.telstra.net/v2/oauth/token",
+                    params, new JsonHttpResponseHandler() {
+                        @Override
+                        public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                            // If the response is JSONObject instead of expected JSONArray
+                            System.out.println(response);
+//                            {
+//                                "access_token": "GsKEoBB1a5p8GAubHXTh6TmQ2xfI",
+//                                    "token_type": "Bearer",
+//                                    "expires_in": "3599"
+//                            }
+                            if(response.has("access_token")) {
+                                String accessToken = response.optString("access_token");
+
+                                SharedPreferences settings = getSharedPreferences("tokenItem", 0);
+                                String fcmToken = settings.getString("token", null);
+
+                                if(fcmToken != null) sendDeliveryStatus(accessToken, uuid);
+
+//                                SharedPreferences settings = getSharedPreferences("appInstance", 0);
+//                                SharedPreferences.Editor editor = settings.edit();
+//                                editor.putString("appInstanceId", appInstanceId);
+//                                editor.apply();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject jsonObject) {
+                            System.out.println(statusCode + ":" + jsonObject);
+                        }
+                    }
+            );
+
+        } catch(Exception e) {
+            System.out.println(e);
+        }
+    }
+
+    private void sendDeliveryStatus(String accessToken, String uuid) {
+
+        DeliveryStatus ds = new DeliveryStatus();
+        ds.setUuid(uuid);
+        ds.setNotificationStatus("DISPLAY");
+
+        try {
+
+            ObjectMapper mapper = new ObjectMapper();
+
+            SyncHttpClient client = new SyncHttpClient(true, 80, 443);
+            client.addHeader("Authorization", "Bearer " + accessToken);
+            client.addHeader("Content-Type", "application/json");
+
+            StringEntity entity = new StringEntity(mapper.writeValueAsString(ds));
+
+            https://slot2.org002.t-dev.telstra.net:443/v2/oauth/token
+            client.post(getApplicationContext(), "https://slot2.org002.t-dev.telstra.net:443/v1/notification-mgmt/push-delivery-status-tracker",
+                    entity, "application/json", new JsonHttpResponseHandler() {
+                        @Override
+                        public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                            // If the response is JSONObject instead of expected JSONArray
+                            System.out.println(response);
+                            // {"code":201,"applicationLabel":"Notify Push Token App","time":"2018-04-21T12:49:34.495+0000","correlationId":"032a5d74-9819-4d0c-9414-8883dd28f94b","data":{"appInstanceId":"2b2ef18d-06b0-4cec-ac22-111b7e7d4bcc"},"status":201,"message":null,"errors":[],"path":"\/v1\/notification\/dch\/push\/token","method":"POST"}
+//                            if(response.has("data")) {
+//                                JSONObject data = response.optJSONObject("data");
+//                                String appInstanceId = data.optString("appInstanceId");
+//                                SharedPreferences settings = getSharedPreferences("appInstance", 0);
+//                                SharedPreferences.Editor editor = settings.edit();
+//                                editor.putString("appInstanceId", appInstanceId);
+//                                editor.apply();
+//                                System.out.println("AppInstance id: " + appInstanceId);
+//                            }
+                        }
+
+                        @Override
+                        public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject jsonObject) {
+                            System.out.println(statusCode + ":" + jsonObject);
+                        }
+                    }
+            );
+
+        } catch(Exception e) {
+            System.out.println(e);
+        }
+
     }
 
 }

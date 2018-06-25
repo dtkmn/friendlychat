@@ -19,23 +19,15 @@ import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.firebase.codelab.friendlychat.entity.AccessTokenResponse;
 import com.google.firebase.codelab.friendlychat.entity.AppInstance;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
 import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.SyncHttpClient;
 
 import org.json.JSONObject;
 
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.net.URLEncoder;
 
 import cz.msebera.android.httpclient.Header;
@@ -57,26 +49,16 @@ public class MyFirebaseInstanceIdService extends FirebaseInstanceIdService {
         // If you want to send messages to this application instance or
         // manage this apps subscriptions on the server side, send the
         // Instance ID token to your app server.
-        sendRegistrationToServer(refreshedToken);
+        getAccessToken(refreshedToken);
     }
 
-    /**
-     * Persist token to third-party servers.
-     *
-     * Modify this method to associate the user's FCM InstanceID token with any server-side account
-     * maintained by your application.
-     *
-     * @param token The new token.
-     */
-    private void sendRegistrationToServer(String token) {
-        // TODO: Implement this method to send token to your app server.
-        SharedPreferences settings = getSharedPreferences("tokenItem", 0);
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putString("token", token);
-        editor.apply();
-
-        OutputStream out = null;
+    private void getAccessToken(final String fcmToken) {
         try {
+
+            ObjectMapper mapper = new ObjectMapper();
+
+            SyncHttpClient client = new SyncHttpClient(true, 80, 443);
+            client.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
             String data = URLEncoder.encode("grant_type", "UTF-8")
                     + "=" + URLEncoder.encode("client_credentials", "UTF-8");
@@ -90,58 +72,54 @@ public class MyFirebaseInstanceIdService extends FirebaseInstanceIdService {
             data += "&" + URLEncoder.encode("scope_value", "UTF-8")
                     + "=" + URLEncoder.encode("PUSHFCM-MGMT", "UTF-8");
 
-            URL url = new URL("https://slot2.org002.t-dev.telstra.net:443/v2/oauth/token");
+            RequestParams params = new RequestParams();
+            params.put("grant_type", "client_credentials");
+            params.put("client_id", "SKoEL7R7kg3GhFO7xGV4Yj39jNWzTxxO");
+            params.put("client_secret", "8NSrfe1lAWUXDjtS");
+            params.put("scope_value", "PUSHFCM-MGMT");
 
-            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setRequestMethod("POST");
+            StringEntity entity = new StringEntity(data);
 
-            out = new BufferedOutputStream(urlConnection.getOutputStream());
+            // https://slot2.org002.t-dev.telstra.net:443/v2/oauth/token
+            client.post("https://slot2.org002.t-dev.telstra.net/v2/oauth/token",
+                    params, new JsonHttpResponseHandler() {
+                        @Override
+                        public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                            // If the response is JSONObject instead of expected JSONArray
+                            System.out.println(response);
+//                            {
+//                                "access_token": "GsKEoBB1a5p8GAubHXTh6TmQ2xfI",
+//                                    "token_type": "Bearer",
+//                                    "expires_in": "3599"
+//                            }
+                            if(response.has("access_token")) {
+                                String accessToken = response.optString("access_token");
 
-            BufferedWriter writer = new BufferedWriter (new OutputStreamWriter(out, "UTF-8"));
+//                                SharedPreferences settings = getSharedPreferences("tokenItem", 0);
+//                                String fcmToken = settings.getString("token", null);
 
-            writer.write(data);
+                                if(fcmToken != null) createAppInstance(accessToken, fcmToken);
 
-            writer.flush();
+//                                SharedPreferences settings = getSharedPreferences("appInstance", 0);
+//                                SharedPreferences.Editor editor = settings.edit();
+//                                editor.putString("appInstanceId", appInstanceId);
+//                                editor.apply();
+                            }
+                        }
 
+                        @Override
+                        public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject jsonObject) {
+                            System.out.println(statusCode + ":" + jsonObject);
+                        }
+                    }
+            );
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-            StringBuilder sb = new StringBuilder();
-            String line = null;
-
-            // Read Server Response
-            while((line = reader.readLine()) != null)
-            {
-                // Append server response in string
-                sb.append(line + "\n");
-            }
-
-            System.out.println(sb.toString());
-
-            ObjectMapper mapper = new ObjectMapper();
-            AccessTokenResponse accessTokenResponse = mapper.readValue(sb.toString(), AccessTokenResponse.class);
-
-            createAppInstance(accessTokenResponse.getAccess_token(), token);
-
-
-
-            writer.close();
-
-            out.close();
-
-            urlConnection.connect();
-
-
-        } catch (Exception e) {
-
-            System.out.println(e.getMessage());
-
-
-
+        } catch(Exception e) {
+            System.out.println(e);
         }
-
     }
 
-    private void createAppInstance(String accessToken, String fcmToken) {
+    private void createAppInstance(String accessToken, final String fcmToken) {
 
         AppInstance appInstance = new AppInstance();
         appInstance.setAppType("24x7");
@@ -175,6 +153,7 @@ public class MyFirebaseInstanceIdService extends FirebaseInstanceIdService {
                                 SharedPreferences settings = getSharedPreferences("appInstance", 0);
                                 SharedPreferences.Editor editor = settings.edit();
                                 editor.putString("appInstanceId", appInstanceId);
+                                editor.putString("fcmToken", fcmToken);
                                 editor.apply();
                                 System.out.println("AppInstance id: " + appInstanceId);
                             }
@@ -190,45 +169,6 @@ public class MyFirebaseInstanceIdService extends FirebaseInstanceIdService {
         } catch(Exception e) {
             System.out.println(e);
         }
-
-//        try {
-//            URL appInstanceUrl = new URL("https://slot2.org002.t-dev.telstra.net:443/v1/notification-mgmt/app-instances");
-//
-//            HttpURLConnection urlConnection = (HttpURLConnection) appInstanceUrl.openConnection();
-//            urlConnection.setRequestMethod("POST");
-//            urlConnection.addRequestProperty("Authorization", "Bearer " + accessToken);
-//            urlConnection.addRequestProperty("Content-Type", "application/json");
-//
-//            OutputStream out = new BufferedOutputStream(urlConnection.getOutputStream());
-//
-//            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
-//
-//            ObjectMapper mapper = new ObjectMapper();
-//
-//            writer.write(mapper.writeValueAsString(appInstance));
-//
-//            writer.flush();
-//
-//
-//            BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-//            StringBuilder sb = new StringBuilder();
-//            String line = null;
-//
-//            // Read Server Response
-//            while ((line = reader.readLine()) != null) {
-//                // Append server response in string
-//                sb.append(line + "\n");
-//            }
-//
-//            System.out.println(sb.toString());
-//
-//            writer.close();
-//            out.close();
-//            urlConnection.connect();
-//
-//        } catch(Exception e) {
-//            System.out.println(e);
-//        }
 
 
 
