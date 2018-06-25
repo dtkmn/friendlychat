@@ -105,28 +105,28 @@ public class SignInActivity extends AppCompatActivity implements
             AsyncHttpClient client = new AsyncHttpClient(true, 80, 443);
             client.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
-            String data = URLEncoder.encode("grant_type", "UTF-8")
-                    + "=" + URLEncoder.encode("client_credentials", "UTF-8");
-
-            data += "&" + URLEncoder.encode("client_id", "UTF-8") + "="
-                    + URLEncoder.encode("SKoEL7R7kg3GhFO7xGV4Yj39jNWzTxxO", "UTF-8");
-
-            data += "&" + URLEncoder.encode("client_secret", "UTF-8")
-                    + "=" + URLEncoder.encode("8NSrfe1lAWUXDjtS", "UTF-8");
-
-            data += "&" + URLEncoder.encode("scope_value", "UTF-8")
-                    + "=" + URLEncoder.encode("PUSHFCM-MGMT", "UTF-8");
+//            String data = URLEncoder.encode("grant_type", "UTF-8")
+//                    + "=" + URLEncoder.encode("client_credentials", "UTF-8");
+//
+//            data += "&" + URLEncoder.encode("client_id", "UTF-8") + "="
+//                    + URLEncoder.encode("SKoEL7R7kg3GhFO7xGV4Yj39jNWzTxxO", "UTF-8");
+//
+//            data += "&" + URLEncoder.encode("client_secret", "UTF-8")
+//                    + "=" + URLEncoder.encode("8NSrfe1lAWUXDjtS", "UTF-8");
+//
+//            data += "&" + URLEncoder.encode("scope_value", "UTF-8")
+//                    + "=" + URLEncoder.encode("PUSHFCM-MGMT", "UTF-8");
 
             RequestParams params = new RequestParams();
             params.put("grant_type", "client_credentials");
-            params.put("client_id", "SKoEL7R7kg3GhFO7xGV4Yj39jNWzTxxO");
-            params.put("client_secret", "8NSrfe1lAWUXDjtS");
+            params.put("client_id", "DSXI2p3xS63OmS2IfXVSZN49iTRbxlUx");
+            params.put("client_secret", "Ttdc5O1bqFS1LUe7");
             params.put("scope_value", "PUSHFCM-MGMT");
 
-            StringEntity entity = new StringEntity(data);
+//            StringEntity entity = new StringEntity(data);
 
             // https://slot2.org002.t-dev.telstra.net:443/v2/oauth/token
-            client.post("https://slot2.org002.t-dev.telstra.net/v2/oauth/token",
+            client.post("https://staging-tapi.t-dev.in.telstra.com.au/v2/oauth/token",
                     params, new JsonHttpResponseHandler() {
                         @Override
                         public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
