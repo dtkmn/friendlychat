@@ -16,9 +16,9 @@ public class Config {
     // External UAT
 //    private final String baseUrl = "slot2.org002.t-dev.telstra.net";
     // Staging
-    private final String baseUrl = "staging-tapi.telstra.com";
-    // Prod
 //    private final String baseUrl = "staging-tapi.telstra.com";
+    // Prod
+    private final String baseUrl = "staging-tapi.telstra.com";
 
 
     public String getGrantType() {

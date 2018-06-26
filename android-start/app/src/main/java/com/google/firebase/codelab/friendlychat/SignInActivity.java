@@ -234,10 +234,12 @@ public class SignInActivity extends AppCompatActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         int i = item.getItemId();
 
-        if (i == R.id.chat_menu) {
-            Intent intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
-        } else if (i == R.id.work_menu) {
+//        if (i == R.id.chat_menu) {
+//            Intent intent = new Intent(this, MainActivity.class);
+//            startActivity(intent);
+//        } else
+
+        if (i == R.id.work_menu) {
             Intent intent = new Intent(this, WorkActivity.class);
             startActivity(intent);
         } else if(i == R.id.bill_menu) {

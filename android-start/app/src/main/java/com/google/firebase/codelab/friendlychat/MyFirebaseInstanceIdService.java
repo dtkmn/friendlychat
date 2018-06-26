@@ -105,7 +105,7 @@ public class MyFirebaseInstanceIdService extends FirebaseInstanceIdService {
 
     private void createAppInstance(String accessToken, final String fcmToken) {
 
-        AppInstance appInstance = new AppInstance();
+        final AppInstance appInstance = new AppInstance();
         appInstance.setAppType("24x7");
         appInstance.setPushNotificationPlatformType("FCM");
         appInstance.setPushNotificationToken(fcmToken);
@@ -138,6 +138,8 @@ public class MyFirebaseInstanceIdService extends FirebaseInstanceIdService {
                                 SharedPreferences.Editor editor = settings.edit();
                                 editor.putString("appInstanceId", appInstanceId);
                                 editor.putString("fcmToken", fcmToken);
+                                editor.putString("operationSystemDetails", appInstance.getOperationSystemDetails());
+                                editor.putString("deviceDetails", appInstance.getDeviceDetails());
                                 editor.apply();
                                 System.out.println("AppInstance id: " + appInstanceId);
                             }

@@ -269,8 +269,8 @@ public class MainActivity extends AppCompatActivity
 //        LocalBroadcastManager.getInstance(MainActivity.this)
 //                .registerReceiver(broadcastReceiver, new IntentFilter("testIntent"));
 
-        FirebaseMessaging.getInstance().subscribeToTopic("/topics/TelstraNotify");
-        FirebaseInstanceId.getInstance().getToken();
+//        FirebaseMessaging.getInstance().subscribeToTopic("/topics/TelstraNotify");
+//        FirebaseInstanceId.getInstance().getToken();
     }
 
     @Override
@@ -306,10 +306,12 @@ public class MainActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
 //        return super.onOptionsItemSelected(item);
         int i = item.getItemId();
-        if (i == R.id.chat_menu) {
-            Intent intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
-        } else if (i == R.id.work_menu) {
+//        if (i == R.id.chat_menu) {
+//            Intent intent = new Intent(this, MainActivity.class);
+//            startActivity(intent);
+//        } else
+
+        if (i == R.id.work_menu) {
             Intent intent = new Intent(this, WorkActivity.class);
             startActivity(intent);
         } else if(i == R.id.bill_menu) {

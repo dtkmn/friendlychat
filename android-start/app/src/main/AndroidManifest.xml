@@ -27,13 +27,13 @@
         </activity>
         <activity android:name="com.google.firebase.codelab.friendlychat.WorkActivity">
             <intent-filter>
-                <action android:name="WORK_ACTIVITY_1" />
+                <action android:name="work-activity" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
         <activity android:name="com.google.firebase.codelab.friendlychat.BillSummary">
             <intent-filter>
-                <action android:name="BILL_SUMMARY" />
+                <action android:name="deep-link" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>

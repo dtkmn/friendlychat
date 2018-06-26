@@ -68,10 +68,11 @@ public class WorkActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int i = item.getItemId();
 
-        if (i == R.id.chat_menu) {
-            Intent intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
-        } else if (i == R.id.about_menu) {
+//        if (i == R.id.chat_menu) {
+//            Intent intent = new Intent(this, MainActivity.class);
+//            startActivity(intent);
+//        } else
+        if (i == R.id.about_menu) {
             Intent intent = new Intent(this, About.class);
             startActivity(intent);
         } else if (i == R.id.work_menu) {

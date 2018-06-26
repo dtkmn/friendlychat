@@ -49,7 +49,7 @@ public class BillSummary extends AppCompatActivity {
 //        }
 
 
-        FirebaseMessaging.getInstance().subscribeToTopic("/topics/TelstraNotify");
+        FirebaseMessaging.getInstance().subscribeToTopic("TelstraNotify");
         FirebaseInstanceId.getInstance().getToken();
 
     }
@@ -69,10 +69,11 @@ public class BillSummary extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int i = item.getItemId();
-        if (i == R.id.chat_menu) {
-            Intent intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
-        } else if (i == R.id.work_menu) {
+//        if (i == R.id.chat_menu) {
+//            Intent intent = new Intent(this, MainActivity.class);
+//            startActivity(intent);
+//        } else
+        if (i == R.id.work_menu) {
             Intent intent = new Intent(this, WorkActivity.class);
             startActivity(intent);
         } else if(i == R.id.bill_menu) {

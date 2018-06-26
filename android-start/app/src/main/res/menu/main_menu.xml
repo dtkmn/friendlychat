@@ -28,15 +28,15 @@
 
     <item
         android:id="@+id/work_menu"
-        android:title="@string/work_screen"/>
+        android:title="@string/complaints_screen"/>
 
     <item
         android:id="@+id/bill_menu"
         android:title="Bill"/>
 
-    <item
-        android:id="@+id/chat_menu"
-        android:title="@string/chat_screen"/>
+    <!--<item-->
+        <!--android:id="@+id/chat_menu"-->
+        <!--android:title="@string/chat_screen"/>-->
 
     <item
         android:id="@+id/sign_in_menu"
