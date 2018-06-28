@@ -15,7 +15,13 @@
  */
 package com.google.firebase.codelab.friendlychat;
 
+import android.app.PendingIntent;
+import android.content.Intent;
 import android.content.SharedPreferences;
+
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.app.RemoteInput;
 import android.util.Log;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,6 +44,8 @@ import java.util.Set;
 
 import cz.msebera.android.httpclient.Header;
 import cz.msebera.android.httpclient.entity.StringEntity;
+
+import static android.app.Notification.VISIBILITY_PUBLIC;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
@@ -104,8 +112,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 //                data.get("description")
 //        );
 
-        mFirebaseDatabaseReference.child(MESSAGES_CHILD)
-                .push().setValue(remoteMessage);
+//        mFirebaseDatabaseReference.child(MESSAGES_CHILD)
+//                .push().setValue(remoteMessage);
 
 
         String uuid = data.get("UUID");
@@ -116,7 +124,43 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         if(!username.equals(userId)) {
             System.out.println("payload username not equals to local saved username!");
         } else {
-            getAccessToken(uuid);
+            Intent intent = new Intent(this, BillSummary.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+
+
+
+            String KEY_TEXT_REPLY = "key_text_reply";
+            RemoteInput remoteInput = new RemoteInput.Builder(KEY_TEXT_REPLY)
+                    .setLabel("REPLY")
+                    .build();
+            NotificationCompat.Action action =
+                    new NotificationCompat.Action.Builder(R.drawable.telstra_logo,
+                            "REPLY", pendingIntent)
+                            .addRemoteInput(remoteInput)
+                            .build();
+
+
+            NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, "12345")
+                    .setSmallIcon(R.drawable.telstra_logo)
+                    .setContentTitle(remoteMessage.getNotification().getTitle())
+                    .setContentText(remoteMessage.getNotification().getBody())
+//                    .setStyle(new NotificationCompat.BigTextStyle()
+//                            .bigText("Much longer text that cannot fit one line..."))
+                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                    // Set the intent that will fire when the user taps the notification
+                    .setContentIntent(pendingIntent)
+                    .setVisibility(VISIBILITY_PUBLIC)
+                    .addAction(action)
+                    .setAutoCancel(true);
+
+
+
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getApplicationContext());
+
+            // notificationId is a unique int for each notification that you must define
+            notificationManager.notify(100029292, mBuilder.build());
+//            getAccessToken(uuid);
         }
 
     }

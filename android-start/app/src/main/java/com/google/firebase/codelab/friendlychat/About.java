@@ -1,7 +1,10 @@
 package com.google.firebase.codelab.friendlychat;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -21,8 +24,6 @@ import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.SyncHttpClient;
 
 import org.json.JSONObject;
-
-import java.net.URLEncoder;
 
 import cz.msebera.android.httpclient.Header;
 import cz.msebera.android.httpclient.entity.StringEntity;
@@ -57,6 +58,20 @@ public class About extends AppCompatActivity {
         mDeviceDetails = (TextView) findViewById(R.id.deviceDetailsValue);
 
         SharedPreferences settings = getSharedPreferences("appInstance", 0);
+        settings.registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                mFcmToken.setText(sharedPreferences.getString("fcmToken", mFcmToken.getText().toString()));
+                currentToken = sharedPreferences.getString("fcmToken", "");
+
+                mAppInstanceId.setText(sharedPreferences.getString("appInstanceId", mAppInstanceId.getText().toString()));
+                appInstanceId = sharedPreferences.getString("appInstanceId", "");
+
+                mUserName.setText(sharedPreferences.getString("username", mUserName.getText().toString()));
+                username = sharedPreferences.getString("username", "");
+            }
+        });
+
         mFcmToken.setText(settings.getString("fcmToken", mFcmToken.getText().toString()));
         System.out.println(settings.getString("fcmToken", ""));
         currentToken = settings.getString("fcmToken", "");
@@ -68,10 +83,10 @@ public class About extends AppCompatActivity {
         mUserName.setText(settings.getString("username", mUserName.getText().toString()));
         username = settings.getString("username", "");
 
-        mDeviceDetails.setText(settings.getString("deviceDetails", mDeviceDetails.getText().toString()));
-        deviceDetails = settings.getString("deviceDetails", "");
+//        mDeviceDetails.setText(settings.getString("deviceDetails", mDeviceDetails.getText().toString()));
+//        deviceDetails = settings.getString("deviceDetails", "");
 
-        if(this.getIntent().getExtras() != null) {
+        if (this.getIntent().getExtras() != null) {
             mFcmToken.setText(
                     this.getIntent().getExtras().getString("fcmTokenText", mFcmToken.getText().toString()));
             mAppInstanceId.setText(
@@ -81,7 +96,22 @@ public class About extends AppCompatActivity {
             mDeviceDetails.setText(
                     this.getIntent().getExtras().getString("deviceDetailsValue", mDeviceDetails.getText().toString()));
         }
+    }
 
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = getString(R.string.google_app_id);
+            String description = getString(R.string.gcm_defaultSenderId);
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel("12345", name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
     }
 
     @Override

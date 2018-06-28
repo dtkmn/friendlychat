@@ -18,9 +18,9 @@ import com.google.firebase.messaging.FirebaseMessaging;
 
 public class BillSummary extends AppCompatActivity {
 
-    private TextView mAccountNumber;
+//    private TextView mAccountNumber;
     private TextView mBalance;
-    private TextView mDueDate;
+    private TextView mOverdueNoticeText;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -28,25 +28,26 @@ public class BillSummary extends AppCompatActivity {
         setContentView(R.layout.bill_main);
 
 //        mAccountNumber = (TextView) findViewById(R.id.ticketNumberTextText);
-//        mBalance = (TextView) findViewById(R.id.jobTypeTextText);
-//        mDueDate = (TextView) findViewById(R.id.addressTextText);
+        mBalance = (TextView) findViewById(R.id.balanceAmountText);
+//        overdueNoticeText
+        mOverdueNoticeText = (TextView) findViewById(R.id.overdueNoticeText);
 //
 //        SharedPreferences settings = getSharedPreferences("workItem", 0);
 //        mAccountNumber.setText(settings.getString("ticketNumber", mAccountNumber.getText().toString()));
 //        mBalance.setText(settings.getString("jobType", mBalance.getText().toString()));
 //        mDueDate.setText(settings.getString("address", mDueDate.getText().toString()));
 //
-//        if(this.getIntent().getExtras() != null) {
+        if(this.getIntent().getExtras() != null) {
 //            mAccountNumber.setText(
 //                    this.getIntent().getExtras().getString("ticketNumber", mAccountNumber.getText().toString()));
-//
-//            mBalance.setText(
-//                    this.getIntent().getExtras().getString("jobType", mBalance.getText().toString()));
-//
-//            mDueDate.setText(
-//                    this.getIntent().getExtras().getString("address", mDueDate.getText().toString()));
-//
-//        }
+
+            mBalance.setText(
+                    this.getIntent().getExtras().getString("amountOwing", mBalance.getText().toString()));
+
+            String text = this.getIntent().getExtras().getString("amountOwing", mOverdueNoticeText.getText().toString());
+            mOverdueNoticeText.setText(text + " Overdue - please pay now");
+
+        }
 
 
         FirebaseMessaging.getInstance().subscribeToTopic("TelstraNotify");

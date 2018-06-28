@@ -14,7 +14,12 @@
             android:resource="@drawable/myicon" />
 
         <activity android:name="com.google.firebase.codelab.friendlychat.MainActivity" />
-        <activity android:name="com.google.firebase.codelab.friendlychat.About" />
+        <activity android:name="com.google.firebase.codelab.friendlychat.About">
+            <intent-filter>
+                <action android:name="about" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
         <activity android:name="com.google.firebase.codelab.friendlychat.Messages" />
         <activity android:name="com.google.firebase.codelab.friendlychat.SignInActivity" />
         <activity

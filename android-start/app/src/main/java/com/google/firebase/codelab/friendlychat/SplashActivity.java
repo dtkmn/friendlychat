@@ -22,7 +22,7 @@ public class SplashActivity extends AppCompatActivity {
 //            }
 //        }, new IntentFilter("intentForSplashScreen"));
 
-        Intent intent = new Intent(this, BillSummary.class);
+        Intent intent = new Intent(this, About.class);
         startActivity(intent);
         finish();
     }
