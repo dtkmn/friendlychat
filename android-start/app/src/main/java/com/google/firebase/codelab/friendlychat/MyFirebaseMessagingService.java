@@ -124,11 +124,16 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         if(!username.equals(userId)) {
             System.out.println("payload username not equals to local saved username!");
         } else {
+//            remoteMessage.getNotification().getClickAction()
             Intent intent = new Intent(this, BillSummary.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
-
-
+            Map<String, String> remoteMessageData = remoteMessage.getData();
+            remoteMessage.getData().keySet();
+            for(String key: remoteMessage.getData().keySet()) {
+                intent.putExtra(key, remoteMessageData.get(key));
+            }
+            int uniqueInt = (int) (System.currentTimeMillis() & 0xfffffff);
+            PendingIntent pendingIntent = PendingIntent.getActivity(this, uniqueInt, intent, 0);
 
             String KEY_TEXT_REPLY = "key_text_reply";
             RemoteInput remoteInput = new RemoteInput.Builder(KEY_TEXT_REPLY)
@@ -151,6 +156,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     // Set the intent that will fire when the user taps the notification
                     .setContentIntent(pendingIntent)
                     .setVisibility(VISIBILITY_PUBLIC)
+                    .setExtras(intent.getExtras())
                     .addAction(action)
                     .setAutoCancel(true);
 

@@ -96,6 +96,8 @@ public class About extends AppCompatActivity {
             mDeviceDetails.setText(
                     this.getIntent().getExtras().getString("deviceDetailsValue", mDeviceDetails.getText().toString()));
         }
+
+        createNotificationChannel();
     }
 
     private void createNotificationChannel() {
