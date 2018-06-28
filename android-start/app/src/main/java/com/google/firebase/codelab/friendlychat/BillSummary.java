@@ -1,6 +1,7 @@
 package com.google.firebase.codelab.friendlychat;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -11,6 +12,11 @@ import android.widget.TextView;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessaging;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by dtkmn on 1/06/2017.
@@ -44,6 +50,23 @@ public class BillSummary extends AppCompatActivity {
 //        mDueDate.setText(settings.getString("address", mDueDate.getText().toString()));
 //
         if(this.getIntent().getExtras() != null) {
+
+            Bundle extras = getIntent().getExtras();
+            if(extras.getString("ACTIONTYPE") == null) {
+                SharedPreferences settings = getSharedPreferences("workItem", 0);
+                SharedPreferences.Editor editor = settings.edit();
+                Set<String> receivedMessages = settings.getStringSet("messages", null);
+                if (receivedMessages == null) receivedMessages = new HashSet<>();
+
+                Map<String, String> maps = new HashMap<>();
+                for (String key : extras.keySet()) {
+                    maps.put(key, extras.getString(key));
+                }
+
+                receivedMessages.add(maps.toString());
+                editor.putStringSet("messages", receivedMessages);
+                editor.apply();
+            }
 //            mAccountNumber.setText(
 //                    this.getIntent().getExtras().getString("ticketNumber", mAccountNumber.getText().toString()));
 

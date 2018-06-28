@@ -56,7 +56,6 @@ public class Messages extends AppCompatActivity {
         if(receivedMessages == null) receivedMessages = new HashSet<>();
         // For the cursor adapter, specify which columns go into which views
 //        String[] fromColumns = receivedMessages.toArray(new String[receivedMessages.size()]);
-
         for(String message: receivedMessages) {
             messagesText.append(message + "\n\n\n\n");
         }

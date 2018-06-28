@@ -125,47 +125,52 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             System.out.println("payload username not equals to local saved username!");
         } else {
 //            remoteMessage.getNotification().getClickAction()
-            Intent intent = new Intent(this, BillSummary.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            Map<String, String> remoteMessageData = remoteMessage.getData();
-            remoteMessage.getData().keySet();
-            for(String key: remoteMessage.getData().keySet()) {
-                intent.putExtra(key, remoteMessageData.get(key));
-            }
-            int uniqueInt = (int) (System.currentTimeMillis() & 0xfffffff);
-            PendingIntent pendingIntent = PendingIntent.getActivity(this, uniqueInt, intent, 0);
 
-            String KEY_TEXT_REPLY = "key_text_reply";
-            RemoteInput remoteInput = new RemoteInput.Builder(KEY_TEXT_REPLY)
-                    .setLabel("REPLY")
-                    .build();
-            NotificationCompat.Action action =
-                    new NotificationCompat.Action.Builder(R.drawable.telstra_logo,
-                            "REPLY", pendingIntent)
-                            .addRemoteInput(remoteInput)
-                            .build();
+            if(remoteMessage.getNotification() != null) {
+                Intent intent = new Intent(this, BillSummary.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                Map<String, String> remoteMessageData = remoteMessage.getData();
+                remoteMessage.getData().keySet();
+                for (String key : remoteMessage.getData().keySet()) {
+                    intent.putExtra(key, remoteMessageData.get(key));
+                }
+                intent.putExtra("ACTIONTYPE", "INTERNAL");
+                int uniqueInt = (int) (System.currentTimeMillis() & 0xfffffff);
+                PendingIntent pendingIntent = PendingIntent.getActivity(this, uniqueInt, intent, 0);
+
+                String KEY_TEXT_REPLY = "key_text_reply";
+                RemoteInput remoteInput = new RemoteInput.Builder(KEY_TEXT_REPLY)
+                        .setLabel("REPLY")
+                        .build();
+                NotificationCompat.Action action =
+                        new NotificationCompat.Action.Builder(R.drawable.telstra_logo,
+                                "REPLY", pendingIntent)
+                                .addRemoteInput(remoteInput)
+                                .build();
 
 
-            NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, "12345")
-                    .setSmallIcon(R.drawable.telstra_logo)
-                    .setContentTitle(remoteMessage.getNotification().getTitle())
-                    .setContentText(remoteMessage.getNotification().getBody())
+                NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, "12345")
+                        .setSmallIcon(R.drawable.telstra_logo)
+                        .setContentTitle(remoteMessage.getNotification().getTitle())
+                        .setContentText(remoteMessage.getNotification().getBody())
 //                    .setStyle(new NotificationCompat.BigTextStyle()
 //                            .bigText("Much longer text that cannot fit one line..."))
-                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                    // Set the intent that will fire when the user taps the notification
-                    .setContentIntent(pendingIntent)
-                    .setVisibility(VISIBILITY_PUBLIC)
-                    .setExtras(intent.getExtras())
-                    .addAction(action)
-                    .setAutoCancel(true);
+                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                        // Set the intent that will fire when the user taps the notification
+                        .setContentIntent(pendingIntent)
+                        .setVisibility(VISIBILITY_PUBLIC)
+                        .setExtras(intent.getExtras())
+                        .addAction(action)
+                        .setAutoCancel(true);
 
 
+                NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getApplicationContext());
 
-            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getApplicationContext());
+                // notificationId is a unique int for each notification that you must define
+                notificationManager.notify(100029292, mBuilder.build());
 
-            // notificationId is a unique int for each notification that you must define
-            notificationManager.notify(100029292, mBuilder.build());
+            }
+
 //            getAccessToken(uuid);
         }
 
