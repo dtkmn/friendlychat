@@ -206,7 +206,7 @@ public class BillSummary extends AppCompatActivity {
 
         DeliveryStatus ds = new DeliveryStatus();
         ds.setUuid(uuid);
-        ds.setNotificationStatus("DISPLAY");
+        ds.setNotificationStatus("DISPLAYED");
 
         try {
 

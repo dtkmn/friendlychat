@@ -233,7 +233,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         DeliveryStatus ds = new DeliveryStatus();
         ds.setUuid(uuid);
-        ds.setNotificationStatus("DISPLAY");
+        ds.setNotificationStatus("DISPLAYED");
 
         try {
 
