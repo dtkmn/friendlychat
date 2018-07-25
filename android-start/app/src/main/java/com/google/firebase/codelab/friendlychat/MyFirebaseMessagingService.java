@@ -118,6 +118,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         String uuid = data.get("UUID");
         String userId = data.get("userId");
+        String title = data.get("templatedTitle");
+        String body = data.get("templatedBody");
 
         SharedPreferences appInstanceSettings = getSharedPreferences("appInstance", 0);
         String username = appInstanceSettings.getString("username", "");
@@ -126,7 +128,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         } else {
 //            remoteMessage.getNotification().getClickAction()
 
-            if(remoteMessage.getNotification() != null) {
+//            if(remoteMessage.getNotification() != null) {
                 Intent intent = new Intent(this, BillSummary.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 Map<String, String> remoteMessageData = remoteMessage.getData();
@@ -151,8 +153,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
                 NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, "12345")
                         .setSmallIcon(R.drawable.telstra_logo)
-                        .setContentTitle(remoteMessage.getNotification().getTitle())
-                        .setContentText(remoteMessage.getNotification().getBody())
+                        .setContentTitle(title)
+                        .setContentText(body)
 //                    .setStyle(new NotificationCompat.BigTextStyle()
 //                            .bigText("Much longer text that cannot fit one line..."))
                         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -169,7 +171,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 // notificationId is a unique int for each notification that you must define
                 notificationManager.notify(100029292, mBuilder.build());
 
-            }
+//            }
 
             getAccessToken(uuid);
         }

@@ -62,6 +62,7 @@ public class BillSummary extends AppCompatActivity {
 //        mBalance.setText(settings.getString("jobType", mBalance.getText().toString()));
 //        mDueDate.setText(settings.getString("address", mDueDate.getText().toString()));
 //
+        // When it is from notification ...
         if(this.getIntent().getExtras() != null) {
 
             Bundle extras = getIntent().getExtras();
@@ -83,8 +84,27 @@ public class BillSummary extends AppCompatActivity {
 
                 // sending delivery_status
                 String uuid = maps.get("UUID");
-                getAccessToken(uuid);
+                getAccessToken(uuid, "DISPLAYED");
 
+            } else if(extras.getString("ACTIONTYPE").equals("INTERNAL")) {
+                SharedPreferences settings = getSharedPreferences("workItem", 0);
+                SharedPreferences.Editor editor = settings.edit();
+                Set<String> receivedMessages = settings.getStringSet("messages", null);
+                if (receivedMessages == null) receivedMessages = new HashSet<>();
+
+                Map<String, String> maps = new HashMap<>();
+                for (String key : extras.keySet()) {
+                    maps.put(key, extras.get(key).toString());
+                }
+
+                receivedMessages.add(maps.toString());
+                editor.putStringSet("messages", receivedMessages);
+                editor.apply();
+
+
+                // sending delivery_status
+                String uuid = maps.get("UUID");
+                getAccessToken(uuid, "RECEIVED");
             }
 //            mAccountNumber.setText(
 //                    this.getIntent().getExtras().getString("ticketNumber", mAccountNumber.getText().toString()));
@@ -150,7 +170,7 @@ public class BillSummary extends AppCompatActivity {
 
 
 
-    private void getAccessToken(final String uuid) {
+    private void getAccessToken(final String uuid, final String state) {
         try {
 
             AsyncHttpClient client = new AsyncHttpClient(true, 80, 443);
@@ -180,7 +200,7 @@ public class BillSummary extends AppCompatActivity {
                                 String fcmToken = settings.getString("fcmToken", null);
 
                                 if(fcmToken != null) {
-                                    sendDeliveryStatus(accessToken, uuid);
+                                    sendDeliveryStatus(accessToken, uuid, state);
                                 }
 
 //                                SharedPreferences settings = getSharedPreferences("appInstance", 0);
@@ -202,11 +222,11 @@ public class BillSummary extends AppCompatActivity {
         }
     }
 
-    private void sendDeliveryStatus(String accessToken, String uuid) {
+    private void sendDeliveryStatus(String accessToken, String uuid, String state) {
 
         DeliveryStatus ds = new DeliveryStatus();
         ds.setUuid(uuid);
-        ds.setNotificationStatus("DISPLAYED");
+        ds.setNotificationStatus(state);
 
         try {
 
