@@ -104,7 +104,7 @@ public class BillSummary extends AppCompatActivity {
 
                 // sending delivery_status
                 String uuid = maps.get("UUID");
-                getAccessToken(uuid, "RECEIVED");
+                getAccessToken(uuid, "USER_CLICKED");
             }
 //            mAccountNumber.setText(
 //                    this.getIntent().getExtras().getString("ticketNumber", mAccountNumber.getText().toString()));

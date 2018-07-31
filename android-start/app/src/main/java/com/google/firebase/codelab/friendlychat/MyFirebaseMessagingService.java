@@ -31,6 +31,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.SyncHttpClient;
@@ -123,8 +124,15 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         SharedPreferences appInstanceSettings = getSharedPreferences("appInstance", 0);
         String username = appInstanceSettings.getString("username", "");
+
+        getAccessToken(uuid, "RECEIVED");
+
         if(!username.equals(userId)) {
+            // NOT_DISPLAYED_NO_USER
+            // NOT_DISPLAYED_ERROR
+            // NOT_DISPLAYED_HIDDEN
             System.out.println("payload username not equals to local saved username!");
+            getAccessToken(uuid, "NOT_DISPLAYED_NO_USER");
         } else {
 //            remoteMessage.getNotification().getClickAction()
 
@@ -236,6 +244,106 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         DeliveryStatus ds = new DeliveryStatus();
         ds.setUuid(uuid);
         ds.setNotificationStatus("DISPLAYED");
+
+        try {
+
+            ObjectMapper mapper = new ObjectMapper();
+
+            SyncHttpClient client = new SyncHttpClient(true, 80, 443);
+            client.addHeader("Authorization", "Bearer " + accessToken);
+            client.addHeader("Content-Type", "application/json");
+
+            StringEntity entity = new StringEntity(mapper.writeValueAsString(ds));
+
+            client.post(getApplicationContext(), "https://" + config.getBaseUrl() + "/v1/notification-mgmt/push-delivery-status-tracker",
+                    entity, "application/json", new JsonHttpResponseHandler() {
+                        @Override
+                        public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                            // If the response is JSONObject instead of expected JSONArray
+                            System.out.println(response);
+                            // {"code":201,"applicationLabel":"Notify Push Token App","time":"2018-04-21T12:49:34.495+0000","correlationId":"032a5d74-9819-4d0c-9414-8883dd28f94b","data":{"appInstanceId":"2b2ef18d-06b0-4cec-ac22-111b7e7d4bcc"},"status":201,"message":null,"errors":[],"path":"\/v1\/notification\/dch\/push\/token","method":"POST"}
+//                            if(response.has("data")) {
+//                                JSONObject data = response.optJSONObject("data");
+//                                String appInstanceId = data.optString("appInstanceId");
+//                                SharedPreferences settings = getSharedPreferences("appInstance", 0);
+//                                SharedPreferences.Editor editor = settings.edit();
+//                                editor.putString("appInstanceId", appInstanceId);
+//                                editor.apply();
+//                                System.out.println("AppInstance id: " + appInstanceId);
+//                            }
+                        }
+
+                        @Override
+                        public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject jsonObject) {
+                            System.out.println(statusCode + ":" + jsonObject);
+                        }
+                    }
+            );
+
+        } catch(Exception e) {
+            System.out.println(e);
+        }
+
+    }
+
+
+    private void getAccessToken(final String uuid, final String state) {
+        try {
+
+            SyncHttpClient client = new SyncHttpClient(true, 80, 443);
+            client.addHeader("Content-Type", "application/x-www-form-urlencoded");
+
+            RequestParams params = new RequestParams();
+            params.put("grant_type", config.getGrantType());
+            params.put("client_id", config.getClientId());
+            params.put("client_secret", config.getClientSecret());
+            params.put("scope_value", config.getScopeValue());
+
+            client.post("https://" + config.getBaseUrl() + "/v2/oauth/token",
+                    params, new JsonHttpResponseHandler() {
+                        @Override
+                        public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                            // If the response is JSONObject instead of expected JSONArray
+                            System.out.println(response);
+//                            {
+//                                "access_token": "GsKEoBB1a5p8GAubHXTh6TmQ2xfI",
+//                                    "token_type": "Bearer",
+//                                    "expires_in": "3599"
+//                            }
+                            if(response.has("access_token")) {
+                                String accessToken = response.optString("access_token");
+
+                                SharedPreferences settings = getSharedPreferences("appInstance", 0);
+                                String fcmToken = settings.getString("fcmToken", null);
+
+                                if(fcmToken != null) {
+                                    sendDeliveryStatus(accessToken, uuid, state);
+                                }
+
+//                                SharedPreferences settings = getSharedPreferences("appInstance", 0);
+//                                SharedPreferences.Editor editor = settings.edit();
+//                                editor.putString("appInstanceId", appInstanceId);
+//                                editor.apply();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject jsonObject) {
+                            System.out.println(statusCode + ":" + jsonObject);
+                        }
+                    }
+            );
+
+        } catch(Exception e) {
+            System.out.println(e);
+        }
+    }
+
+    private void sendDeliveryStatus(String accessToken, String uuid, String state) {
+
+        DeliveryStatus ds = new DeliveryStatus();
+        ds.setUuid(uuid);
+        ds.setNotificationStatus(state);
 
         try {
 
