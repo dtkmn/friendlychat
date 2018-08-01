@@ -2,6 +2,7 @@ package com.google.firebase.codelab.friendlychat;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -63,10 +64,10 @@ public class BillSummary extends AppCompatActivity {
 //        mDueDate.setText(settings.getString("address", mDueDate.getText().toString()));
 //
         // When it is from notification ...
-        if(this.getIntent().getExtras() != null) {
+        if (this.getIntent().getExtras() != null) {
 
             Bundle extras = getIntent().getExtras();
-            if(extras.getString("ACTIONTYPE") == null) {
+            if (extras.getString("ACTIONTYPE") == null) {
                 SharedPreferences settings = getSharedPreferences("workItem", 0);
                 SharedPreferences.Editor editor = settings.edit();
                 Set<String> receivedMessages = settings.getStringSet("messages", null);
@@ -86,7 +87,7 @@ public class BillSummary extends AppCompatActivity {
                 String uuid = maps.get("UUID");
                 getAccessToken(uuid, "DISPLAYED");
 
-            } else if(extras.getString("ACTIONTYPE").equals("INTERNAL")) {
+            } else if (extras.getString("ACTIONTYPE").equals("INTERNAL")) {
                 SharedPreferences settings = getSharedPreferences("workItem", 0);
                 SharedPreferences.Editor editor = settings.edit();
                 Set<String> receivedMessages = settings.getStringSet("messages", null);
@@ -121,6 +122,10 @@ public class BillSummary extends AppCompatActivity {
         FirebaseMessaging.getInstance().subscribeToTopic("TelstraNotify");
         FirebaseInstanceId.getInstance().getToken();
 
+        // ATTENTION: This was auto-generated to handle app links.
+        Intent appLinkIntent = getIntent();
+        String appLinkAction = appLinkIntent.getAction();
+        Uri appLinkData = appLinkIntent.getData();
     }
 
     @Override
