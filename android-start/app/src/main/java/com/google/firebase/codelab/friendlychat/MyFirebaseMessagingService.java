@@ -15,15 +15,24 @@
  */
 package com.google.firebase.codelab.friendlychat;
 
+import android.app.PendingIntent;
+import android.content.Intent;
 import android.content.SharedPreferences;
+
+import android.net.Uri;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.app.RemoteInput;
 import android.util.Log;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.firebase.codelab.friendlychat.entity.Config;
 import com.google.firebase.codelab.friendlychat.entity.DeliveryStatus;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.SyncHttpClient;
@@ -38,11 +47,14 @@ import java.util.Set;
 import cz.msebera.android.httpclient.Header;
 import cz.msebera.android.httpclient.entity.StringEntity;
 
+import static android.app.Notification.VISIBILITY_PUBLIC;
+
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private static final String TAG = "MyFMService";
     private DatabaseReference mFirebaseDatabaseReference;
     public static final String MESSAGES_CHILD = "receivedMessages";
+    private Config config = new Config();
 
     @Override
     public void onCreate() {
@@ -102,18 +114,83 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 //                data.get("description")
 //        );
 
-        mFirebaseDatabaseReference.child(MESSAGES_CHILD)
-                .push().setValue(remoteMessage);
+//        mFirebaseDatabaseReference.child(MESSAGES_CHILD)
+//                .push().setValue(remoteMessage);
 
 
         String uuid = data.get("UUID");
         String userId = data.get("userId");
+        String title = data.get("templatedTitle");
+        String body = data.get("templatedBody");
+        String targetUrl = data.get("targetUrl");
 
         SharedPreferences appInstanceSettings = getSharedPreferences("appInstance", 0);
         String username = appInstanceSettings.getString("username", "");
+
+        getAccessToken(uuid, "RECEIVED");
+
         if(!username.equals(userId)) {
+            // NOT_DISPLAYED_NO_USER
+            // NOT_DISPLAYED_ERROR
+            // NOT_DISPLAYED_HIDDEN
             System.out.println("payload username not equals to local saved username!");
+            getAccessToken(uuid, "NOT_DISPLAYED_NO_USER");
         } else {
+//            remoteMessage.getNotification().getClickAction()
+
+//            if(remoteMessage.getNotification() != null) {
+
+                Intent intent;
+                if(targetUrl != null) {
+                    intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setData(Uri.parse(targetUrl));
+                } else {
+                    intent = new Intent(this, BillSummary.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    Map<String, String> remoteMessageData = remoteMessage.getData();
+                    remoteMessage.getData().keySet();
+                    for (String key : remoteMessage.getData().keySet()) {
+                        intent.putExtra(key, remoteMessageData.get(key));
+                    }
+                    intent.putExtra("ACTIONTYPE", "INTERNAL");
+                }
+
+                int uniqueInt = (int) (System.currentTimeMillis() & 0xfffffff);
+                PendingIntent pendingIntent = PendingIntent.getActivity(this, uniqueInt, intent, 0);
+
+                String KEY_TEXT_REPLY = "key_text_reply";
+                RemoteInput remoteInput = new RemoteInput.Builder(KEY_TEXT_REPLY)
+                        .setLabel("REPLY")
+                        .build();
+                NotificationCompat.Action action =
+                        new NotificationCompat.Action.Builder(R.drawable.telstra_logo,
+                                "REPLY", pendingIntent)
+                                .addRemoteInput(remoteInput)
+                                .build();
+
+
+                NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, "12345")
+                        .setSmallIcon(R.drawable.telstra_logo)
+                        .setContentTitle(title)
+                        .setContentText(body)
+//                    .setStyle(new NotificationCompat.BigTextStyle()
+//                            .bigText("Much longer text that cannot fit one line..."))
+                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                        // Set the intent that will fire when the user taps the notification
+                        .setContentIntent(pendingIntent)
+                        .setVisibility(VISIBILITY_PUBLIC)
+                        .setExtras(intent.getExtras())
+                        .addAction(action)
+                        .setAutoCancel(true);
+
+
+                NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getApplicationContext());
+
+                // notificationId is a unique int for each notification that you must define
+                notificationManager.notify(100029292, mBuilder.build());
+
+//            }
+
             getAccessToken(uuid);
         }
 
@@ -123,33 +200,16 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private void getAccessToken(final String uuid) {
         try {
 
-            ObjectMapper mapper = new ObjectMapper();
-
             SyncHttpClient client = new SyncHttpClient(true, 80, 443);
             client.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
-            String data = URLEncoder.encode("grant_type", "UTF-8")
-                    + "=" + URLEncoder.encode("client_credentials", "UTF-8");
-
-            data += "&" + URLEncoder.encode("client_id", "UTF-8") + "="
-                    + URLEncoder.encode("SKoEL7R7kg3GhFO7xGV4Yj39jNWzTxxO", "UTF-8");
-
-            data += "&" + URLEncoder.encode("client_secret", "UTF-8")
-                    + "=" + URLEncoder.encode("8NSrfe1lAWUXDjtS", "UTF-8");
-
-            data += "&" + URLEncoder.encode("scope_value", "UTF-8")
-                    + "=" + URLEncoder.encode("PUSHFCM-MGMT", "UTF-8");
-
             RequestParams params = new RequestParams();
-            params.put("grant_type", "client_credentials");
-            params.put("client_id", "SKoEL7R7kg3GhFO7xGV4Yj39jNWzTxxO");
-            params.put("client_secret", "8NSrfe1lAWUXDjtS");
-            params.put("scope_value", "PUSHFCM-MGMT");
+            params.put("grant_type", config.getGrantType());
+            params.put("client_id", config.getClientId());
+            params.put("client_secret", config.getClientSecret());
+            params.put("scope_value", config.getScopeValue());
 
-            StringEntity entity = new StringEntity(data);
-
-            // https://slot2.org002.t-dev.telstra.net:443/v2/oauth/token
-            client.post("https://slot2.org002.t-dev.telstra.net/v2/oauth/token",
+            client.post("https://" + config.getBaseUrl() + "/v2/oauth/token",
                     params, new JsonHttpResponseHandler() {
                         @Override
                         public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
@@ -163,10 +223,12 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                             if(response.has("access_token")) {
                                 String accessToken = response.optString("access_token");
 
-                                SharedPreferences settings = getSharedPreferences("tokenItem", 0);
-                                String fcmToken = settings.getString("token", null);
+                                SharedPreferences settings = getSharedPreferences("appInstance", 0);
+                                String fcmToken = settings.getString("fcmToken", null);
 
-                                if(fcmToken != null) sendDeliveryStatus(accessToken, uuid);
+                                if(fcmToken != null) {
+                                    sendDeliveryStatus(accessToken, uuid);
+                                }
 
 //                                SharedPreferences settings = getSharedPreferences("appInstance", 0);
 //                                SharedPreferences.Editor editor = settings.edit();
@@ -191,7 +253,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         DeliveryStatus ds = new DeliveryStatus();
         ds.setUuid(uuid);
-        ds.setNotificationStatus("DISPLAY");
+        ds.setNotificationStatus("DISPLAYED");
 
         try {
 
@@ -203,8 +265,107 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
             StringEntity entity = new StringEntity(mapper.writeValueAsString(ds));
 
-            https://slot2.org002.t-dev.telstra.net:443/v2/oauth/token
-            client.post(getApplicationContext(), "https://slot2.org002.t-dev.telstra.net:443/v1/notification-mgmt/push-delivery-status-tracker",
+            client.post(getApplicationContext(), "https://" + config.getBaseUrl() + "/v1/notification-mgmt/push-delivery-status-tracker",
+                    entity, "application/json", new JsonHttpResponseHandler() {
+                        @Override
+                        public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                            // If the response is JSONObject instead of expected JSONArray
+                            System.out.println(response);
+                            // {"code":201,"applicationLabel":"Notify Push Token App","time":"2018-04-21T12:49:34.495+0000","correlationId":"032a5d74-9819-4d0c-9414-8883dd28f94b","data":{"appInstanceId":"2b2ef18d-06b0-4cec-ac22-111b7e7d4bcc"},"status":201,"message":null,"errors":[],"path":"\/v1\/notification\/dch\/push\/token","method":"POST"}
+//                            if(response.has("data")) {
+//                                JSONObject data = response.optJSONObject("data");
+//                                String appInstanceId = data.optString("appInstanceId");
+//                                SharedPreferences settings = getSharedPreferences("appInstance", 0);
+//                                SharedPreferences.Editor editor = settings.edit();
+//                                editor.putString("appInstanceId", appInstanceId);
+//                                editor.apply();
+//                                System.out.println("AppInstance id: " + appInstanceId);
+//                            }
+                        }
+
+                        @Override
+                        public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject jsonObject) {
+                            System.out.println(statusCode + ":" + jsonObject);
+                        }
+                    }
+            );
+
+        } catch(Exception e) {
+            System.out.println(e);
+        }
+
+    }
+
+
+    private void getAccessToken(final String uuid, final String state) {
+        try {
+
+            SyncHttpClient client = new SyncHttpClient(true, 80, 443);
+            client.addHeader("Content-Type", "application/x-www-form-urlencoded");
+
+            RequestParams params = new RequestParams();
+            params.put("grant_type", config.getGrantType());
+            params.put("client_id", config.getClientId());
+            params.put("client_secret", config.getClientSecret());
+            params.put("scope_value", config.getScopeValue());
+
+            client.post("https://" + config.getBaseUrl() + "/v2/oauth/token",
+                    params, new JsonHttpResponseHandler() {
+                        @Override
+                        public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                            // If the response is JSONObject instead of expected JSONArray
+                            System.out.println(response);
+//                            {
+//                                "access_token": "GsKEoBB1a5p8GAubHXTh6TmQ2xfI",
+//                                    "token_type": "Bearer",
+//                                    "expires_in": "3599"
+//                            }
+                            if(response.has("access_token")) {
+                                String accessToken = response.optString("access_token");
+
+                                SharedPreferences settings = getSharedPreferences("appInstance", 0);
+                                String fcmToken = settings.getString("fcmToken", null);
+
+                                if(fcmToken != null) {
+                                    sendDeliveryStatus(accessToken, uuid, state);
+                                }
+
+//                                SharedPreferences settings = getSharedPreferences("appInstance", 0);
+//                                SharedPreferences.Editor editor = settings.edit();
+//                                editor.putString("appInstanceId", appInstanceId);
+//                                editor.apply();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject jsonObject) {
+                            System.out.println(statusCode + ":" + jsonObject);
+                        }
+                    }
+            );
+
+        } catch(Exception e) {
+            System.out.println(e);
+        }
+    }
+
+    private void sendDeliveryStatus(String accessToken, String uuid, String state) {
+
+        DeliveryStatus ds = new DeliveryStatus();
+        ds.setUuid(uuid);
+        ds.setNotificationStatus(state);
+
+        try {
+
+            ObjectMapper mapper = new ObjectMapper();
+
+            SyncHttpClient client = new SyncHttpClient(true, 80, 443);
+            client.addHeader("Authorization", "Bearer " + accessToken);
+            client.addHeader("Content-Type", "application/json");
+
+            StringEntity entity = new StringEntity(mapper.writeValueAsString(ds));
+
+            client.post(getApplicationContext(), "https://" + config.getBaseUrl() + "/v1/notification-mgmt/push-delivery-status-tracker",
                     entity, "application/json", new JsonHttpResponseHandler() {
                         @Override
                         public void onSuccess(int statusCode, Header[] headers, JSONObject response) {

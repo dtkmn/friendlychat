@@ -20,6 +20,7 @@ import android.util.Log;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.firebase.codelab.friendlychat.entity.AppInstance;
+import com.google.firebase.codelab.friendlychat.entity.Config;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -28,8 +29,6 @@ import com.loopj.android.http.SyncHttpClient;
 
 import org.json.JSONObject;
 
-import java.net.URLEncoder;
-
 import cz.msebera.android.httpclient.Header;
 import cz.msebera.android.httpclient.entity.StringEntity;
 
@@ -37,6 +36,8 @@ public class MyFirebaseInstanceIdService extends FirebaseInstanceIdService {
 
     private static final String TAG = "MyFirebaseIIDService";
     private static final String FRIENDLY_ENGAGE_TOPIC = "friendly_engage";
+
+    private Config config = new Config();
 
     /**
      * The Application's current Instance ID token is no longer valid and thus a new one must be requested.
@@ -55,33 +56,16 @@ public class MyFirebaseInstanceIdService extends FirebaseInstanceIdService {
     private void getAccessToken(final String fcmToken) {
         try {
 
-            ObjectMapper mapper = new ObjectMapper();
-
             SyncHttpClient client = new SyncHttpClient(true, 80, 443);
             client.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
-            String data = URLEncoder.encode("grant_type", "UTF-8")
-                    + "=" + URLEncoder.encode("client_credentials", "UTF-8");
-
-            data += "&" + URLEncoder.encode("client_id", "UTF-8") + "="
-                    + URLEncoder.encode("SKoEL7R7kg3GhFO7xGV4Yj39jNWzTxxO", "UTF-8");
-
-            data += "&" + URLEncoder.encode("client_secret", "UTF-8")
-                    + "=" + URLEncoder.encode("8NSrfe1lAWUXDjtS", "UTF-8");
-
-            data += "&" + URLEncoder.encode("scope_value", "UTF-8")
-                    + "=" + URLEncoder.encode("PUSHFCM-MGMT", "UTF-8");
-
             RequestParams params = new RequestParams();
-            params.put("grant_type", "client_credentials");
-            params.put("client_id", "SKoEL7R7kg3GhFO7xGV4Yj39jNWzTxxO");
-            params.put("client_secret", "8NSrfe1lAWUXDjtS");
-            params.put("scope_value", "PUSHFCM-MGMT");
+            params.put("grant_type", config.getGrantType());
+            params.put("client_id", config.getClientId());
+            params.put("client_secret", config.getClientSecret());
+            params.put("scope_value", config.getScopeValue());
 
-            StringEntity entity = new StringEntity(data);
-
-            // https://slot2.org002.t-dev.telstra.net:443/v2/oauth/token
-            client.post("https://slot2.org002.t-dev.telstra.net/v2/oauth/token",
+            client.post("https://" + config.getBaseUrl() + "/v2/oauth/token",
                     params, new JsonHttpResponseHandler() {
                         @Override
                         public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
@@ -121,7 +105,7 @@ public class MyFirebaseInstanceIdService extends FirebaseInstanceIdService {
 
     private void createAppInstance(String accessToken, final String fcmToken) {
 
-        AppInstance appInstance = new AppInstance();
+        final AppInstance appInstance = new AppInstance();
         appInstance.setAppType("24x7");
         appInstance.setPushNotificationPlatformType("FCM");
         appInstance.setPushNotificationToken(fcmToken);
@@ -139,9 +123,9 @@ public class MyFirebaseInstanceIdService extends FirebaseInstanceIdService {
 
             StringEntity entity = new StringEntity(mapper.writeValueAsString(appInstance));
 
-            https://slot2.org002.t-dev.telstra.net:443/v2/oauth/token
-            client.post(getApplicationContext(), "https://slot2.org002.t-dev.telstra.net/v1/notification-mgmt/app-instances",
-                    entity, "application/json", new JsonHttpResponseHandler() {
+            client.post(getApplicationContext(), "https://" + config.getBaseUrl() +
+                "/v1/notification-mgmt/app-instances", entity, "application/json",
+                    new JsonHttpResponseHandler() {
                         @Override
                         public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                             // If the response is JSONObject instead of expected JSONArray
@@ -154,6 +138,8 @@ public class MyFirebaseInstanceIdService extends FirebaseInstanceIdService {
                                 SharedPreferences.Editor editor = settings.edit();
                                 editor.putString("appInstanceId", appInstanceId);
                                 editor.putString("fcmToken", fcmToken);
+                                editor.putString("operationSystemDetails", appInstance.getOperationSystemDetails());
+                                editor.putString("deviceDetails", appInstance.getDeviceDetails());
                                 editor.apply();
                                 System.out.println("AppInstance id: " + appInstanceId);
                             }

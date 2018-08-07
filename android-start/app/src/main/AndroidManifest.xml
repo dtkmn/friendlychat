@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.google.firebase.codelab.friendlychat">
 
     <application
@@ -14,7 +15,12 @@
             android:resource="@drawable/myicon" />
 
         <activity android:name="com.google.firebase.codelab.friendlychat.MainActivity" />
-        <activity android:name="com.google.firebase.codelab.friendlychat.About" />
+        <activity android:name="com.google.firebase.codelab.friendlychat.About">
+            <intent-filter>
+                <action android:name="about" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
         <activity android:name="com.google.firebase.codelab.friendlychat.Messages" />
         <activity android:name="com.google.firebase.codelab.friendlychat.SignInActivity" />
         <activity
@@ -27,21 +33,33 @@
         </activity>
         <activity android:name="com.google.firebase.codelab.friendlychat.WorkActivity">
             <intent-filter>
-                <action android:name="WORK_ACTIVITY_1" />
+                <action android:name="work-activity" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
         <activity android:name="com.google.firebase.codelab.friendlychat.BillSummary">
+            <tools:validation testUrl="http://247.notify.com/billReminder" />
+
             <intent-filter>
-                <action android:name="BILL_SUMMARY" />
+                <action android:name="deep-link" />
                 <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="http"
+                    android:host="247.notify.com"
+                    android:path="/billReminder" />
             </intent-filter>
         </activity>
 
-        <service
-            android:name="com.google.firebase.codelab.friendlychat.MyFirebaseMessagingService">
+        <service android:name="com.google.firebase.codelab.friendlychat.MyFirebaseMessagingService">
             <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
 

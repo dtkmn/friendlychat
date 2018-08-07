@@ -56,9 +56,8 @@ public class Messages extends AppCompatActivity {
         if(receivedMessages == null) receivedMessages = new HashSet<>();
         // For the cursor adapter, specify which columns go into which views
 //        String[] fromColumns = receivedMessages.toArray(new String[receivedMessages.size()]);
-
         for(String message: receivedMessages) {
-            messagesText.append(message + "\n");
+            messagesText.append(message + "\n\n\n\n");
         }
 
 
@@ -115,10 +114,12 @@ public class Messages extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int i = item.getItemId();
 
-        if (i == R.id.chat_menu) {
-            Intent intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
-        } else if (i == R.id.about_menu) {
+//        if (i == R.id.chat_menu) {
+//            Intent intent = new Intent(this, MainActivity.class);
+//            startActivity(intent);
+//        } else
+
+        if (i == R.id.about_menu) {
             Intent intent = new Intent(this, About.class);
             startActivity(intent);
         } else if (i == R.id.work_menu) {

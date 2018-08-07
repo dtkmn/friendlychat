@@ -33,14 +33,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.firebase.codelab.friendlychat.entity.Config;
 import com.google.firebase.codelab.friendlychat.entity.LinkUserAndAppRequest;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 
 import org.json.JSONObject;
-
-import java.net.URLEncoder;
 
 import cz.msebera.android.httpclient.Header;
 import cz.msebera.android.httpclient.entity.StringEntity;
@@ -56,6 +55,8 @@ public class SignInActivity extends AppCompatActivity implements
     private TextView mSigninText;
 
     private GoogleApiClient mGoogleApiClient;
+
+    private Config config = new Config();
 
     // Firebase instance variables
 
@@ -100,33 +101,16 @@ public class SignInActivity extends AppCompatActivity implements
     private void getAccessToken() {
         try {
 
-            ObjectMapper mapper = new ObjectMapper();
-
             AsyncHttpClient client = new AsyncHttpClient(true, 80, 443);
             client.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
-            String data = URLEncoder.encode("grant_type", "UTF-8")
-                    + "=" + URLEncoder.encode("client_credentials", "UTF-8");
-
-            data += "&" + URLEncoder.encode("client_id", "UTF-8") + "="
-                    + URLEncoder.encode("SKoEL7R7kg3GhFO7xGV4Yj39jNWzTxxO", "UTF-8");
-
-            data += "&" + URLEncoder.encode("client_secret", "UTF-8")
-                    + "=" + URLEncoder.encode("8NSrfe1lAWUXDjtS", "UTF-8");
-
-            data += "&" + URLEncoder.encode("scope_value", "UTF-8")
-                    + "=" + URLEncoder.encode("PUSHFCM-MGMT", "UTF-8");
-
             RequestParams params = new RequestParams();
-            params.put("grant_type", "client_credentials");
-            params.put("client_id", "SKoEL7R7kg3GhFO7xGV4Yj39jNWzTxxO");
-            params.put("client_secret", "8NSrfe1lAWUXDjtS");
-            params.put("scope_value", "PUSHFCM-MGMT");
+            params.put("grant_type", config.getGrantType());
+            params.put("client_id", config.getClientId());
+            params.put("client_secret", config.getClientSecret());
+            params.put("scope_value", config.getScopeValue());
 
-            StringEntity entity = new StringEntity(data);
-
-            // https://slot2.org002.t-dev.telstra.net:443/v2/oauth/token
-            client.post("https://slot2.org002.t-dev.telstra.net/v2/oauth/token",
+            client.post("https://" + config.getBaseUrl() + "/v2/oauth/token",
                     params, new JsonHttpResponseHandler() {
                         @Override
                         public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
@@ -178,7 +162,7 @@ public class SignInActivity extends AppCompatActivity implements
         linkUserAndAppRequest.setPushNotificationToken(fcmToken);
         linkUserAndAppRequest.setUsername(username);
 
-        // https://slot2.org002.t-dev.telstra.net:443/v1/notification-mgmt/app-instances/63b8a1c1-2b5c-4378-8b5d-1aa0361049e0/assigned-tdi-users/jigar1010@test.com
+        // /v1/notification-mgmt/app-instances/63b8a1c1-2b5c-4378-8b5d-1aa0361049e0/assigned-tdi-users/jigar1010@test.com
         //{
         //  "username": "jigar1010@test.com",
         //  "pushNotificationToken": "DT-token-00005",
@@ -202,8 +186,7 @@ public class SignInActivity extends AppCompatActivity implements
 
             StringEntity entity = new StringEntity(mapper.writeValueAsString(linkUserAndAppRequest));
 
-            https://slot2.org002.t-dev.telstra.net:443/v2/oauth/token
-            client.post(getApplicationContext(), "https://slot2.org002.t-dev.telstra.net/v1/notification-mgmt/app-instances/" +
+            client.post(getApplicationContext(), "https://" + config.getBaseUrl() + "/v1/notification-mgmt/app-instances/" +
                             appInstanceId + "/linkUser",
                     entity, "application/json", new JsonHttpResponseHandler() {
                         @Override
@@ -251,20 +234,25 @@ public class SignInActivity extends AppCompatActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         int i = item.getItemId();
 
-        if (i == R.id.chat_menu) {
-            Intent intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
-        } else if (i == R.id.about_menu) {
-            Intent intent = new Intent(this, About.class);
-            startActivity(intent);
-        } else if (i == R.id.work_menu) {
+//        if (i == R.id.chat_menu) {
+//            Intent intent = new Intent(this, MainActivity.class);
+//            startActivity(intent);
+//        } else
+
+        if (i == R.id.work_menu) {
             Intent intent = new Intent(this, WorkActivity.class);
             startActivity(intent);
         } else if(i == R.id.bill_menu) {
             Intent intent = new Intent(this, BillSummary.class);
             startActivity(intent);
+        } else if (i == R.id.about_menu) {
+            Intent intent = new Intent(this, About.class);
+            startActivity(intent);
         } else if (i == R.id.messages) {
             Intent intent = new Intent(this, Messages.class);
+            startActivity(intent);
+        } else if (i == R.id.sign_in_menu) {
+            Intent intent = new Intent(this, SignInActivity.class);
             startActivity(intent);
         }
         return false;
