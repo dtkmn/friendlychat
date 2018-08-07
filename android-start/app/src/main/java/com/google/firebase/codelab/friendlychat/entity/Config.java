@@ -14,7 +14,7 @@ public class Config {
     // Internal UAT
 //    private final String baseUrl = "slot2.org002.t-dev.corp.telstra.com";
     // External UAT
-    private final String baseUrl = "slot2.org002.t-dev.telstra.net";
+    private final String baseUrl = "slot3.org002.t-dev.telstra.net";
     // Staging
 //    private final String baseUrl = "staging-tapi.telstra.com";
     // Prod
