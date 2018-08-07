@@ -19,6 +19,7 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.SharedPreferences;
 
+import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.app.RemoteInput;
@@ -121,6 +122,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         String userId = data.get("userId");
         String title = data.get("templatedTitle");
         String body = data.get("templatedBody");
+        String targetUrl = data.get("targetUrl");
 
         SharedPreferences appInstanceSettings = getSharedPreferences("appInstance", 0);
         String username = appInstanceSettings.getString("username", "");
@@ -137,14 +139,22 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 //            remoteMessage.getNotification().getClickAction()
 
 //            if(remoteMessage.getNotification() != null) {
-                Intent intent = new Intent(this, BillSummary.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                Map<String, String> remoteMessageData = remoteMessage.getData();
-                remoteMessage.getData().keySet();
-                for (String key : remoteMessage.getData().keySet()) {
-                    intent.putExtra(key, remoteMessageData.get(key));
+
+                Intent intent;
+                if(targetUrl != null) {
+                    intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setData(Uri.parse(targetUrl));
+                } else {
+                    intent = new Intent(this, BillSummary.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    Map<String, String> remoteMessageData = remoteMessage.getData();
+                    remoteMessage.getData().keySet();
+                    for (String key : remoteMessage.getData().keySet()) {
+                        intent.putExtra(key, remoteMessageData.get(key));
+                    }
+                    intent.putExtra("ACTIONTYPE", "INTERNAL");
                 }
-                intent.putExtra("ACTIONTYPE", "INTERNAL");
+
                 int uniqueInt = (int) (System.currentTimeMillis() & 0xfffffff);
                 PendingIntent pendingIntent = PendingIntent.getActivity(this, uniqueInt, intent, 0);
 
