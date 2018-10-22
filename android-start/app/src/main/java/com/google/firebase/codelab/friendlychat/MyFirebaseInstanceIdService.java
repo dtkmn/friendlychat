@@ -16,6 +16,7 @@
 package com.google.firebase.codelab.friendlychat;
 
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.util.Log;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -103,14 +104,24 @@ public class MyFirebaseInstanceIdService extends FirebaseInstanceIdService {
         }
     }
 
+    public String getDeviceName() {
+        String manufacturer = Build.MANUFACTURER;
+        String model = Build.MODEL;
+        if (model.toLowerCase().startsWith(manufacturer.toLowerCase())) {
+            return model.substring(0, 19);
+        } else {
+            return (manufacturer + " " + model).substring(0, 19);
+        }
+    }
+
     private void createAppInstance(String accessToken, final String fcmToken) {
 
         final AppInstance appInstance = new AppInstance();
         appInstance.setAppType("24x7");
         appInstance.setPushNotificationPlatformType("FCM");
         appInstance.setPushNotificationToken(fcmToken);
-        appInstance.setAppDetails("Notify Demo App");
-        appInstance.setDeviceDetails("Dan");
+        appInstance.setAppDetails("Notify UAT App");
+        appInstance.setDeviceDetails(getDeviceName());
         appInstance.setOperationSystemDetails("Android 6.x");
 
         try {
