@@ -26,4 +26,12 @@ public class DeliveryStatus {
         this.notificationStatus = notificationStatus;
     }
 
+    @Override
+    public String toString() {
+        return "DeliveryStatus{" +
+                "uuid='" + uuid + '\'' +
+                ", notificationStatus='" + notificationStatus + '\'' +
+                '}';
+    }
+
 }
