@@ -144,7 +144,7 @@ public class About extends AppCompatActivity {
             Intent intent = new Intent(this, BillSummary.class);
             startActivity(intent);
         } else if (i == R.id.messages) {
-            Intent intent = new Intent(this, Messages.class);
+            Intent intent = new Intent(this, ListViewLoader.class);
             startActivity(intent);
         } else if (i == R.id.sign_in_menu) {
             Intent intent = new Intent(this, SignInActivity.class);

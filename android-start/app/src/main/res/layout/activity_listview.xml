@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--  Single List Item Design -->
+
+<!--<LinearLayout android:id="@+id/linearLayout"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:orientation="horizontal"-->
+    <!--xmlns:android="http://schemas.android.com/apk/res/android">-->
+
+    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="10dip"
+        android:text="gfghffhfhffhf"
+        android:textSize="16dip"
+        android:textStyle="bold" />
+
+    <!--<Button-->
+        <!--android:id="@+id/successButton"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginTop="5dp"-->
+        <!--android:text="SUCCESS"-->
+        <!--android:textSize="8sp" />-->
+
+    <!--<Button-->
+        <!--android:id="@+id/failButton"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginTop="5dp"-->
+        <!--android:text="FAIL"-->
+        <!--android:textSize="8sp" />-->
+
+<!--</LinearLayout>-->

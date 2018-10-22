@@ -24,6 +24,7 @@ import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.app.RemoteInput;
 import android.util.Log;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.firebase.codelab.friendlychat.entity.Config;
 import com.google.firebase.codelab.friendlychat.entity.DeliveryStatus;
@@ -94,7 +95,17 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 //        }
         Set<String> receivedMessages = settings.getStringSet("messages", null);
         if(receivedMessages == null) receivedMessages = new HashSet<>();
-        receivedMessages.add(remoteMessage.getData().toString());
+
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonResult = null;
+        try {
+            jsonResult = mapper.writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(remoteMessage.getData());
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
+        receivedMessages.add(jsonResult);
         editor.putStringSet("messages", receivedMessages);
 //        editor.putStringSet("workItemKeys", remoteMessage.getData().keySet());
 //        editor.putString("workItemValues", remoteMessage.getData());
@@ -187,7 +198,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
 //            }
 
-            getAccessToken(uuid, "PROCESSED_SUCCESS");
+            // getAccessToken(uuid, "PROCESSED_SUCCESS");
         }
 
     }
