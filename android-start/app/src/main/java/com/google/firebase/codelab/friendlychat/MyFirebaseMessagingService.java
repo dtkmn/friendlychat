@@ -130,7 +130,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         String userId = data.get("userId");
         String title = data.get("templatedTitle");
         String body = data.get("templatedBody");
-        String targetUrl = data.get("targetUrl");
         String behaviourType = data.get("behaviourType");
 
         SharedPreferences appInstanceSettings = getSharedPreferences("appInstance", 0);
@@ -144,15 +143,28 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         } else if("HIDDEN".equals(behaviourType)) {
             getAccessToken(uuid, "PROCESSED_SUCCESS");
         } else {
+
 //            remoteMessage.getNotification().getClickAction()
 //            if(remoteMessage.getNotification() != null) {
 
                 Intent intent;
-                if(targetUrl != null) {
+                if("DISPLAY_URL".equals(behaviourType) || "DISPLAY_SSO_URL".equals(behaviourType)) {
+                    String clickUrl = data.get("click_url");
                     intent = new Intent(Intent.ACTION_VIEW);
-                    intent.setData(Uri.parse(targetUrl));
+                    intent.setData(Uri.parse(clickUrl));
                 } else {
-                    intent = new Intent(this, BillSummary.class);
+                    if("DISPLAY".equals(behaviourType)) {
+                        String clickAction = data.get("click_action");
+                        if("deep-link".equals(clickAction)) {
+                            intent = new Intent(this, BillSummary.class);
+                        } else {
+                            intent = new Intent(this, About.class);
+                        }
+                    } else {
+                        intent = new Intent(this, BillSummary.class);
+                    }
+
+
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     Map<String, String> remoteMessageData = remoteMessage.getData();
                     remoteMessage.getData().keySet();

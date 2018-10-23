@@ -107,11 +107,12 @@ public class MyFirebaseInstanceIdService extends FirebaseInstanceIdService {
     public String getDeviceName() {
         String manufacturer = Build.MANUFACTURER;
         String model = Build.MODEL;
-        if (model.toLowerCase().startsWith(manufacturer.toLowerCase())) {
-            return model.substring(0, 19);
-        } else {
-            return (manufacturer + " " + model).substring(0, 19);
-        }
+        return model;
+//        if (model.toLowerCase().startsWith(manufacturer.toLowerCase())) {
+//            return model.substring(0, 19);
+//        } else {
+//            return (manufacturer + " " + model).substring(0, 19);
+//        }
     }
 
     private void createAppInstance(String accessToken, final String fcmToken) {
