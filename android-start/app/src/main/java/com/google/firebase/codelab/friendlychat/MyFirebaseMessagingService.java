@@ -38,6 +38,7 @@ import com.loopj.android.http.SyncHttpClient;
 
 import org.json.JSONObject;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -98,6 +99,10 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         ObjectMapper mapper = new ObjectMapper();
         String jsonResult = null;
+
+        // Add current received time
+        remoteMessage.getData().put("ReceivedTime", new Date().toString());
+
         try {
             jsonResult = mapper.writerWithDefaultPrettyPrinter()
                     .writeValueAsString(remoteMessage.getData());
