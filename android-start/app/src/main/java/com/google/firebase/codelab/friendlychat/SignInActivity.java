@@ -249,7 +249,7 @@ public class SignInActivity extends AppCompatActivity implements
             Intent intent = new Intent(this, About.class);
             startActivity(intent);
         } else if (i == R.id.messages) {
-            Intent intent = new Intent(this, Messages.class);
+            Intent intent = new Intent(this, ListViewLoader.class);
             startActivity(intent);
         } else if (i == R.id.sign_in_menu) {
             Intent intent = new Intent(this, SignInActivity.class);
