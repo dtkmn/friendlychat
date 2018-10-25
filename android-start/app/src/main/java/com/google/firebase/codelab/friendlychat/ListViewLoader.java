@@ -82,26 +82,26 @@ public class ListViewLoader extends AppCompatActivity
             }
         });
 
-//        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-//            @Override
-//            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-//                System.out.println("Position: " + position + ", Id: " + id);
-//                System.out.println(listView.getItemAtPosition(position));
-//                ObjectMapper mapper = new ObjectMapper();
-//                try {
-//                    Map<String, Object> map = mapper.readValue(listView.getItemAtPosition(position).toString(), new TypeReference<Map<String, String>>() {
-//                    });
-//                    System.out.println(map);
-//                    if(map.get("UUID") != null) {
-//                        getAccessToken(map.get("UUID").toString(), "PROCESSED_FAILED");
-//                        return true;
-//                    }
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//                return false;
-//            }
-//        });
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                System.out.println("Position: " + position + ", Id: " + id);
+                System.out.println(listView.getItemAtPosition(position));
+                ObjectMapper mapper = new ObjectMapper();
+                try {
+                    Map<String, Object> map = mapper.readValue(listView.getItemAtPosition(position).toString(), new TypeReference<Map<String, String>>() {
+                    });
+                    System.out.println(map);
+                    if(map.get("UUID") != null) {
+                        getAccessToken(map.get("UUID").toString(), "PROCESSED_FAILED");
+                        return true;
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return false;
+            }
+        });
     }
 
     private void getAccessToken(final String uuid, final String state) {
