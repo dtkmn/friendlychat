@@ -16,6 +16,8 @@
 package com.google.firebase.codelab.friendlychat;
 
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -23,13 +25,12 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.app.RemoteInput;
 import android.util.Log;
+import android.widget.RemoteViews;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.firebase.codelab.friendlychat.entity.Config;
 import com.google.firebase.codelab.friendlychat.entity.DeliveryStatus;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -51,14 +52,12 @@ import static android.app.Notification.VISIBILITY_PUBLIC;
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private static final String TAG = "MyFMService";
-    private DatabaseReference mFirebaseDatabaseReference;
     public static final String MESSAGES_CHILD = "receivedMessages";
     private Config config = new Config();
 
     @Override
     public void onCreate() {
         super.onCreate();
-        mFirebaseDatabaseReference = FirebaseDatabase.getInstance().getReference();
     }
 
     public void onMessageReceived(RemoteMessage remoteMessage) {
@@ -79,7 +78,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 //                    break;
 //            }
 //        }
-
 
         saveNotification(remoteMessage);
     }
@@ -120,16 +118,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         Map<String, String> data = remoteMessage.getData();
 
-//        ReceivedMessage receivedMessage = new ReceivedMessage(
-//                remoteMessage.getFrom(), remoteMessage.getNotification().getTitle(),
-//                remoteMessage.getNotification().getBody(),
-//                data.get("ticketNo"), data.get("jobType"), data.get("address"),
-//                data.get("description")
-//        );
-
 //        mFirebaseDatabaseReference.child(MESSAGES_CHILD)
 //                .push().setValue(remoteMessage);
-
 
         String uuid = data.get("UUID");
         String userId = data.get("userId");
@@ -148,15 +138,14 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         } else if("HIDDEN".equals(behaviourType)) {
             getAccessToken(uuid, "PROCESSED_SUCCESS");
         } else {
-
-//            remoteMessage.getNotification().getClickAction()
-//            if(remoteMessage.getNotification() != null) {
-
                 Intent intent;
                 if("DISPLAY_URL".equals(behaviourType) || "DISPLAY_SSO_URL".equals(behaviourType)) {
                     String clickUrl = data.get("click_url");
-                    intent = new Intent(Intent.ACTION_VIEW);
+//                    intent = new Intent(Intent.ACTION_VIEW);
+//                    intent.setData(Uri.parse(clickUrl));
+                    intent = new Intent(this, WebView.class);
                     intent.setData(Uri.parse(clickUrl));
+                    intent.putExtra("UUID", uuid);
                 } else {
                     if("DISPLAY".equals(behaviourType)) {
                         String clickAction = data.get("click_action");
@@ -168,16 +157,15 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     } else {
                         intent = new Intent(this, BillSummary.class);
                     }
-
-
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     Map<String, String> remoteMessageData = remoteMessage.getData();
-                    remoteMessage.getData().keySet();
                     for (String key : remoteMessage.getData().keySet()) {
                         intent.putExtra(key, remoteMessageData.get(key));
                     }
                     intent.putExtra("ACTIONTYPE", "INTERNAL");
                 }
+//                intent.setAction("com.pycitup.BroadcastReceiver");
+                sendBroadcast(intent);
 
                 int uniqueInt = (int) (System.currentTimeMillis() & 0xfffffff);
                 PendingIntent pendingIntent = PendingIntent.getActivity(this, uniqueInt, intent, 0);
@@ -192,8 +180,10 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                                 .addRemoteInput(remoteInput)
                                 .build();
 
+//            RemoteViews notificationView = new RemoteViews(getPackageName(), R.layout.item_message);
+//            notificationView.setOnClickPendingIntent(R.id.textView, pendingIntent);
 
-                NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, "12345")
+            NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, "12345")
                         .setSmallIcon(R.drawable.telstra_logo)
                         .setContentTitle(title)
                         .setContentText(body)
@@ -202,6 +192,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                         // Set the intent that will fire when the user taps the notification
                         .setContentIntent(pendingIntent)
+//                        .setCustomContentView(notificationView)
                         .setVisibility(VISIBILITY_PUBLIC)
                         .setExtras(intent.getExtras())
                         .addAction(action)
@@ -210,12 +201,11 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
                 NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getApplicationContext());
 
+//                getApplicationContext().sendBroadcast(intent);
+//                getApplicationContext().registerReceiver()
                 // notificationId is a unique int for each notification that you must define
                 notificationManager.notify(100029292, mBuilder.build());
 
-//            }
-
-            // getAccessToken(uuid, "PROCESSED_SUCCESS");
         }
 
     }
@@ -319,6 +309,13 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             System.out.println(e);
         }
 
+    }
+
+
+    public static class NotificationReceiver extends BroadcastReceiver {
+        public void onReceive(Context context, Intent intent) {
+            System.out.println("Received Cancelled Event");
+        }
     }
 
 }

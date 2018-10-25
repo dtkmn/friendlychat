@@ -22,6 +22,7 @@
             </intent-filter>
         </activity>
         <activity android:name="com.google.firebase.codelab.friendlychat.Messages" />
+        <activity android:name="com.google.firebase.codelab.friendlychat.WebView" />
         <activity android:name="com.google.firebase.codelab.friendlychat.ListViewLoader" />
         <activity android:name="com.google.firebase.codelab.friendlychat.SignInActivity" />
         <activity
