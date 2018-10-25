@@ -1,23 +1,25 @@
 package com.google.firebase.codelab.friendlychat;
 
-import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.firebase.codelab.friendlychat.entity.Config;
 import com.google.firebase.codelab.friendlychat.entity.DeliveryStatus;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
-import com.loopj.android.http.SyncHttpClient;
 
 import org.json.JSONObject;
 
@@ -29,12 +31,9 @@ import java.util.Set;
 import cz.msebera.android.httpclient.Header;
 import cz.msebera.android.httpclient.entity.StringEntity;
 
-public class ListViewLoader extends Activity
+public class ListViewLoader extends AppCompatActivity
 {
     private Config config = new Config();
-
-    String[] mobileArray = {"Android","IPhone","WindowsMobile","Blackberry",
-            "WebOS","Ubuntu","Windows7","Max OS X"};
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -104,9 +103,6 @@ public class ListViewLoader extends Activity
 //            }
 //        });
     }
-
-
-
 
     private void getAccessToken(final String uuid, final String state) {
         try {
@@ -207,6 +203,35 @@ public class ListViewLoader extends Activity
             System.out.println(e);
         }
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int i = item.getItemId();
+        if (i == R.id.about_menu) {
+            Intent intent = new Intent(this, About.class);
+            startActivity(intent);
+        } else if (i == R.id.work_menu) {
+            Intent intent = new Intent(this, WorkActivity.class);
+            startActivity(intent);
+        } else if(i == R.id.bill_menu) {
+            Intent intent = new Intent(this, BillSummary.class);
+            startActivity(intent);
+        } else if (i == R.id.messages) {
+            Intent intent = new Intent(this, ListViewLoader.class);
+            startActivity(intent);
+        } else if (i == R.id.sign_in_menu) {
+            Intent intent = new Intent(this, SignInActivity.class);
+            startActivity(intent);
+        }
+        return false;
     }
 
 }
