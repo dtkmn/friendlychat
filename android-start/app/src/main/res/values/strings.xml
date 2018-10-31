@@ -22,4 +22,11 @@
     <string name="item_2">Item 2</string>
     <string name="item_3">Item 3</string>
 
+    <string-array name="planets_array">
+        <item>EDS</item>
+        <item>PROCESSED_SUCCESS</item>
+        <item>PROCESSED_FAILED</item>
+        <item>PROCESSED_FAILED_NO_USER</item>
+    </string-array>
+
 </resources>

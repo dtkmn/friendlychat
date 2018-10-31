@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout android:id="@+id/linearLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <TextView
+        android:id="@+id/tvContact"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:width="250sp"
+        android:text="gfghffhfhffhf"
+        android:textSize="12sp"
+        android:textStyle="bold" />
+
+    <!--<CustomButton-->
+        <!--android:id="@+id/btn"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="Call" />-->
+
+    <Spinner xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/planets_spinner"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:textSize="10sp" />
+
+
+</LinearLayout>

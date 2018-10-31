@@ -24,6 +24,7 @@ import com.loopj.android.http.RequestParams;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -48,10 +49,12 @@ public class ListViewLoader extends AppCompatActivity
 
         int messageCount = receivedMessages.size();
         String[] messageArray = new String[messageCount];
+        ArrayList<String> messageList = new ArrayList<>();
         int i=0;
         for(String message: receivedMessages) {
 //            messagesText.append(message + "\n\n\n\n");
             messageArray[i++] = message;
+            messageList.add(message);
         }
 
 //        ArrayAdapter adapter = new ArrayAdapter<>(this,
@@ -59,8 +62,19 @@ public class ListViewLoader extends AppCompatActivity
         ArrayAdapter adapter = new ArrayAdapter<>(this,
                 R.layout.activity_listview, messageArray);
 
+//        Spinner spinner = (Spinner) findViewById(R.id.planets_spinner);
+//        // Create an ArrayAdapter using the string array and a default spinner layout
+//        ArrayAdapter<CharSequence> adapter2 = ArrayAdapter.createFromResource(this,
+//                R.array.planets_array, android.R.layout.simple_spinner_item);
+//// Specify the layout to use when the list of choices appears
+//        adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//// Apply the adapter to the spinner
+//        spinner.setAdapter(adapter2);
+
+
         final ListView listView = findViewById(R.id.mobile_list);
-        listView.setAdapter(adapter);
+        listView.setAdapter(new MyCustomAdapter(messageList, getApplicationContext()));
+//        listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
