@@ -107,7 +107,9 @@ public class MyFirebaseInstanceIdService extends FirebaseInstanceIdService {
     public String getDeviceName() {
         String manufacturer = Build.MANUFACTURER;
         String model = Build.MODEL;
-        return model;
+        if(model.length() > 20) {
+            return model.substring(0, 19);
+        } else return model;
 //        if (model.toLowerCase().startsWith(manufacturer.toLowerCase())) {
 //            return model.substring(0, 19);
 //        } else {
