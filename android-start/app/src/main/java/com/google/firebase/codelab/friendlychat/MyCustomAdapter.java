@@ -91,7 +91,7 @@ public class MyCustomAdapter extends BaseAdapter implements ListAdapter {
                         });
                         System.out.println(map);
                         if (map.get("UUID") != null) {
-                            getAccessToken(map.get("UUID").toString(), "PROCESSED_SUCCESS");
+                            getAccessToken(map.get("UUID").toString(), parent.getItemAtPosition(position).toString());
                         }
                     } catch (IOException e) {
                         e.printStackTrace();

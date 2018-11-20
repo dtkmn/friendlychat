@@ -87,7 +87,7 @@ public class ListViewLoader extends AppCompatActivity
                     });
                     System.out.println(map);
                     if(map.get("UUID") != null) {
-                        getAccessToken(map.get("UUID").toString(), "PROCESSED_SUCCESS");
+                        getAccessToken(map.get("UUID").toString(), listView.getItemAtPosition(position).toString());
                     }
 //                    System.out.println(jsonNode.get("click_action"));
                 } catch (IOException e) {
